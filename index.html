@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basil Alomary - Retro Desktop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="boot-screen" class="fullscreen">
+        <div class="boot-content">
+            <h1>Basil OS</h1>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop" class="fullscreen" style="display: none;">
+        <div id="icons">
+            <div class="icon" data-window="about">
+                <img src="icon-about.png" alt="About">
+                <span>About</span>
+            </div>
+            <div class="icon" data-window="projects">
+                <img src="icon-projects.png" alt="Projects">
+                <span>Projects</span>
+            </div>
+            <div class="icon" data-window="contact">
+                <img src="icon-contact.png" alt="Contact">
+                <span>Contact</span>
+            </div>
+        </div>
+
+        <div id="taskbar">
+            <div id="start-button">Start</div>
+            <div id="open-windows"></div>
+            <div id="system-tray">
+                <div id="clock"></div>
+            </div>
+        </div>
+
+        <div id="start-menu" style="display: none;">
+            <div class="start-item" data-window="about">About</div>
+            <div class="start-item" data-window="projects">Projects</div>
+            <div class="start-item" data-window="contact">Contact</div>
+        </div>
+    </div>
+
+    <div id="windows">
+        <div id="about-window" class="window" style="display: none;">
+            <div class="title-bar">
+                <div class="title">About Basil</div>
+                <div class="window-controls">
+                    <span class="minimize">-</span>
+                    <span class="maximize">□</span>
+                    <span class="close">×</span>
+                </div>
+            </div>
+            <div class="window-content">
+                <h2>About Basil Alomary</h2>
+                <p>
+                    <!-- Add your about content here -->
+                </p>
+            </div>
+        </div>
+
+        <div id="projects-window" class="window" style="display: none;">
+            <div class="title-bar">
+                <div class="title">Projects</div>
+                <div class="window-controls">
+                    <span class="minimize">-</span>
+                    <span class="maximize">□</span>
+                    <span class="close">×</span>
+                </div>
+            </div>
+            <div class="window-content">
+                <h2>My Projects</h2>
+                <!-- Add your projects content here -->
+            </div>
+        </div>
+
+        <div id="contact-window" class="window" style="display: none;">
+            <div class="title-bar">
+                <div class="title">Contact</div>
+                <div class="window-controls">
+                    <span class="minimize">-</span>
+                    <span class="maximize">□</span>
+                    <span class="close">×</span>
+                </div>
+            </div>
+            <div class="window-content">
+                <h2>Contact Basil</h2>
+                <!-- Add your contact content here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

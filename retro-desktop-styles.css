@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+}
+
+.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#boot-screen {
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.boot-content {
+    text-align: center;
+}
+
+.progress-bar {
+    width: 200px;
+    height: 20px;
+    background-color: #333;
+    margin-top: 20px;
+}
+
+.progress {
+    width: 0;
+    height: 100%;
+    background-color: #0f0;
+    transition: width 3s ease-in-out;
+}
+
+#desktop {
+    background-color: #c0c0c0;
+    position: relative;
+}
+
+#icons {
+    padding: 20px;
+}
+
+.icon {
+    text-align: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.icon img {
+    width: 48px;
+    height: 48px;
+}
+
+.icon span {
+    display: block;
+    margin-top: 5px;
+}
+
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #808080;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+#start-button {
+    background-color: #008080;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#open-windows {
+    flex-grow: 1;
+    display: flex;
+    margin-left: 10px;
+}
+
+.taskbar-item {
+    background-color: #c0c0c0;
+    border: 1px solid #000;
+    padding: 5px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+#system-tray {
+    display: flex;
+    align-items: center;
+}
+
+#clock {
+    background-color: #000;
+    color: #fff;
+    padding: 5px;
+}
+
+#start-menu {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    width: 200px;
+    background-color: #c0c0c0;
+    border: 1px solid #000;
+    z-index: 1000;
+}
+
+.start-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.start-item:hover {
+    background-color: #000080;
+    color: #fff;
+}
+
+.window {
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    background-color: #c0c0c0;
+    border: 2px solid #000080;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    resize: both;
+    overflow: auto;
+}
+
+.title-bar {
+    background-color: #000080;
+    color: #fff;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.window-controls span {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.window-content {
+    padding: 10px;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    height: 20px;
+    background-color: #000;
+    animation: blink 1s infinite;
+}
