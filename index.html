@@ -3,52 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basil Alomary - Retro OS</title>
+    <title>Basil Alomary - Retro Desktop</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="crt">
-        <div id="screen">
-            <div id="boot-sequence">
-                <pre id="boot-text"></pre>
+    <div id="desktop">
+        <div id="icons">
+            <div class="icon" data-window="about">
+                <img src="icon-about.png" alt="About">
+                <span>About</span>
             </div>
-            <div id="desktop" style="display: none;">
-                <div id="icons">
-                    <div class="icon" data-window="about">
-                        <img src="icon-about.svg" alt="About">
-                        <span>About Me</span>
-                    </div>
-                    <div class="icon" data-window="projects">
-                        <img src="icon-projects.svg" alt="Projects">
-                        <span>Projects</span>
-                    </div>
-                    <div class="icon" data-window="contact">
-                        <img src="icon-contact.svg" alt="Contact">
-                        <span>Contact</span>
-                    </div>
-                    <div class="icon" data-window="terminal">
-                        <img src="icon-terminal.svg" alt="Terminal">
-                        <span>Terminal</span>
-                    </div>
-                </div>
-                <div id="taskbar">
-                    <div id="start-button">MENU</div>
-                    <div id="open-windows"></div>
-                    <div id="system-tray">
-                        <div id="volume-control">
-                            <input type="range" min="0" max="100" value="50">
-                        </div>
-                        <div id="clock"></div>
-                    </div>
-                </div>
+            <div class="icon" data-window="projects">
+                <img src="icon-projects.png" alt="Projects">
+                <span>Projects</span>
             </div>
-            <div id="windows">
-                <!-- Windows will be dynamically created here -->
+            <div class="icon" data-window="contact">
+                <img src="icon-contact.png" alt="Contact">
+                <span>Contact</span>
             </div>
         </div>
+        <div id="taskbar">
+            <div id="start-button">Start</div>
+            <div id="time"></div>
+        </div>
     </div>
-    <audio id="startup-sound" src="startup.mp3"></audio>
+    <div id="windows"></div>
     <script src="script.js"></script>
 </body>
 </html>
