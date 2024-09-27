@@ -3,32 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basil Alomary - Retro Desktop</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <title>Basil Alomary - Terminal</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #0f0;
+            overflow: hidden;
+        }
+        #terminal {
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .ascii-art {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .command {
+            margin-bottom: 10px;
+        }
+        .response {
+            margin-bottom: 20px;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="desktop">
-        <div id="icons">
-            <div class="icon" data-window="about">
-                <img src="icon-about.png" alt="About">
-                <span>About</span>
-            </div>
-            <div class="icon" data-window="projects">
-                <img src="icon-projects.png" alt="Projects">
-                <span>Projects</span>
-            </div>
-            <div class="icon" data-window="contact">
-                <img src="icon-contact.png" alt="Contact">
-                <span>Contact</span>
-            </div>
-        </div>
-        <div id="taskbar">
-            <div id="start-button">Start</div>
-            <div id="time"></div>
-        </div>
-    </div>
-    <div id="windows"></div>
-    <script src="script.js"></script>
+    <div id="terminal"></div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const asciiArt = `
+ ____            _ _    _    _                                
+|  _ \\          (_) |  / \\  | | ___  _ __ ___   __ _ _ __ _   _ 
+| |_) | __ _ ___ _| | / _ \\ | |/ _ \\| '_ \` _ \\ / _\` | '__| | | |
+|  _ < / _\` / __| | |/ ___ \\| | (_) | | | | | | (_| | |  | |_| |
+|_| \\_\\\\__,_\\___| |_/_/   \\_\\_|\\___/|_| |_| |_|\\__,_|_|   \\__, |
+                                                         |___/ 
+        `;
+
+        const content = [
+            { command: 'whoami', response: 'Basil Alomary' },
+            { command: 'cat current_role.txt', response: 'Head of Research at Stripes (http://www.stripes.co)' },
+            { command: 'ls previous_experience/', response: '- Bain_&_Company.txt\n- Simon_Data.txt\n- Independent_Investor.txt' },
+            { command: 'cat education.txt', response: 'Graduate of Columbia Business School\nGlenn Hubbard Scholarship Recipient' },
+            { command: 'ls fellowships/', response: 'VC_Fellow.txt  MBA_Associate.txt  Student_Fellow.txt  Venture_Partner.txt  InSITE_Fellow.txt' },
+            { command: 'cat writing/articles.txt', response: '1. Why Investors Should Focus More On The Infrastructure Supporting The AI Revolution\n2. OK, Boomer: How An Aging Population Is Going To Impact Real Estate Technology\n3. NFTs, like all art, are all about narrative\n4. "Where am I going to display my NFT?"... and other stupid questions\n5. The Future of InsurTech: Why serving policyholders has been the path to growth for so many...' },
+            { command: 'echo $CONTACT_INFO', response: 'LinkedIn: https://www.linkedin.com/in/basilalomary\nTwitter: https://twitter.com/basilalomary' },
+        ];
+
+        function typeWriter(text, element, index = 0) {
+            if (index < text.length) {
+                element.innerHTML += text.charAt(index);
+                setTimeout(() => typeWriter(text, element, index + 1), 20);
+            } else {
+                element.innerHTML += '<span class="blink">_</span>';
+            }
+        }
+
+        function createLoadingAnimation() {
+            const loading = document.createElement('div');
+            loading.className = 'loading';
+            loading.innerHTML = '|';
+            
+            const frames = ['|', '/', '-', '\\'];
+            let frameIndex = 0;
+
+            const intervalId = setInterval(() => {
+                loading.innerHTML = frames[frameIndex];
+                frameIndex = (frameIndex + 1) % frames.length;
+            }, 100);
+
+            return { element: loading, intervalId };
+        }
+
+        async function displayContent() {
+            const asciiElement = document.createElement('pre');
+            asciiElement.className = 'ascii-art';
+            terminal.appendChild(asciiElement);
+            await new Promise(resolve => typeWriter(asciiArt, asciiElement, 0, resolve));
+
+            for (const item of content) {
+                const commandElement = document.createElement('div');
+                commandElement.className = 'command';
+                terminal.appendChild(commandElement);
+                await new Promise(resolve => typeWriter(`> ${item.command}`, commandElement, 0, resolve));
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const { element: loadingElement, intervalId } = createLoadingAnimation();
+                terminal.appendChild(loadingElement);
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                clearInterval(intervalId);
+                loadingElement.remove();
+
+                const responseElement = document.createElement('div');
+                responseElement.className = 'response';
+                terminal.appendChild(responseElement);
+                await new Promise(resolve => typeWriter(item.response, responseElement, 0, resolve));
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        displayContent();
+    </script>
 </body>
 </html>
