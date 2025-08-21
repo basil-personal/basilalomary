@@ -3,133 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basil Alomary - Terminal</title>
+    <title>Basil Alomary - Principal, Head of Research & Growth Strategy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,600&family=Lora:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body, html {
+        * {
             margin: 0;
             padding: 0;
-            height: 100%;
-            font-family: 'Courier New', monospace;
-            background-color: #000;
-            color: #0f0;
-            overflow: hidden;
-        }
-        #terminal {
-            height: 100%;
-            padding: 20px;
             box-sizing: border-box;
-            overflow-y: auto;
+            cursor: none;
         }
-        .ascii-art {
-            white-space: pre;
+
+        body {
+            font-family: 'Lora', serif;
+            min-height: 100vh;
+            padding: 80px 80px 60px 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            cursor: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+        }
+
+        /* Custom cursor */
+        .cursor {
+            width: 40px;
+            height: 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.3s ease, height 0.3s ease, transform 0.15s ease;
+        }
+
+        .cursor-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.3),
+                0 0 60px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            mix-blend-mode: screen;
+        }
+
+        .cursor.hover {
+            width: 60px;
+            height: 60px;
+        }
+
+        .cursor.hover .cursor-inner {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 1);
+            box-shadow: 
+                0 0 50px rgba(255, 255, 255, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.4),
+                0 0 80px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Hide custom cursor on mobile */
+        @media (hover: none) and (pointer: coarse) {
+            * {
+                cursor: auto;
+            }
+            body {
+                cursor: auto;
+            }
+            .cursor {
+                display: none;
+            }
+        }
+
+        /* Background SVG */
+        .background-svg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 120px;
+            font-weight: 600;
+            line-height: 0.85;
+            letter-spacing: -3px;
+            margin-bottom: 40px;
+        }
+
+        .name-split {
+            display: block;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 600;
+            font-style: italic;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .company {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 35px;
+            line-height: 1.1;
+        }
+
+        .description {
+            font-family: 'Lora', serif;
+            font-size: 20px;
+            font-weight: 300;
+            line-height: 1.4;
+            margin-bottom: 35px;
+            max-width: 1200px;
+            letter-spacing: 0.2px;
+        }
+
+        .experience {
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            font-weight: 300;
+            line-height: 1.5;
+            max-width: 1200px;
+            letter-spacing: 0.1px;
+        }
+
+        .experience a, .description a {
+            color: white;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: opacity 0.3s ease;
+            cursor: none;
+        }
+
+        .experience a:hover, .description a:hover {
+            opacity: 0.7;
+        }
+
+        .footer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 80px;
+        }
+
+        .location-time {
+            font-family: 'Lora', serif;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
             font-size: 12px;
-            line-height: 1;
-            margin-bottom: 20px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            opacity: 0.9;
         }
-        .command {
-            margin-bottom: 10px;
+
+        .social-links {
+            display: flex;
+            gap: 15px;
         }
-        .response {
-            margin-bottom: 20px;
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            border-radius: 4px;
+            cursor: none;
         }
-        .blink {
-            animation: blink 1s infinite;
+
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
-        @keyframes blink {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .loading {
-            display: inline-block;
+
+        .social-links svg {
             width: 20px;
+            height: 20px;
+            fill: white;
         }
-        .hidden {
-            display: none;
+
+        @media (max-width: 768px) {
+            body {
+                padding: 40px 30px 30px 30px;
+            }
+
+            h1 {
+                font-size: 60px;
+                margin-bottom: 25px;
+                line-height: 0.9;
+            }
+
+            .title {
+                font-size: 24px;
+                margin-bottom: 6px;
+            }
+
+            .company {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .description {
+                font-size: 16px;
+                margin-bottom: 20px;
+                line-height: 1.5;
+            }
+
+            .experience {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 25px;
+                margin-top: 50px;
+            }
+
+            .social-links {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .location-time {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 30px 20px 20px 20px;
+            }
+
+            h1 {
+                font-size: 48px;
+                letter-spacing: -2px;
+            }
+
+            .title {
+                font-size: 20px;
+            }
+
+            .company {
+                font-size: 20px;
+            }
+
+            .description {
+                font-size: 14px;
+            }
+
+            .experience {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="terminal"></div>
+    <!-- Custom cursor -->
+    <div class="cursor">
+        <div class="cursor-inner"></div>
+    </div>
+
+    <!-- Background SVG -->
+    <svg class="background-svg" viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid slice">
+        <rect width="1600" height="1600" fill="#000000"/>
+        <rect width="1600" height="1600" fill="#00c5df" fill-opacity="0.1634279611918033"/>
+        <g clip-path="url(#clip0_50_327)">
+            <g filter="url(#filter0_f_50_327)">
+                <rect x="309" y="449" width="1041" height="1251" fill="#00c5df"/>
+                <rect x="251" y="517" width="1004" height="871" fill="#907CFF"/>
+                <rect x="432" y="740" width="949" height="1150" fill="#907CFF"/>
+            </g>
+        </g>
+        <g style="mix-blend-mode:overlay">
+            <rect width="1600" height="1600" fill="url(#pattern0)" fill-opacity="0.75"/>
+            <rect x="0" y="0" width="1600" height="1600" style="fill:gray; stroke:transparent; filter: url(#feTurb02)" />
+        </g>
+        <defs>
+            <filter id="feTurb02" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence baseFrequency="0.7" numOctaves="3" seed="0" result="out1"/> 
+                <feComposite in="out1" in2="SourceGraphic" operator="in" result="out2"/>
+                <feBlend in="SourceGraphic" in2="out2" mode="overlay" result="out3"/>
+            </filter>
+            <filter id="filter0_f_50_327" x="0" y="0" width="1600" height="1600" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                <feGaussianBlur stdDeviation="250" result="effect1_foregroundBlur_50_327"/>
+            </filter>
+            <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="0.08375" height="0.08375">
+                <use xlink:href="#image0_50_327" transform="scale(0.001)"/>
+            </pattern>
+            <clipPath id="clip0_50_327">
+                <rect width="1600" height="1600" fill="white"/>
+            </clipPath>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <h1>
+            <span class="name-split">Basil</span>
+            <span class="name-split">Alomary</span>
+        </h1>
+        
+        <div class="title">Principal, Head of Research & Growth Strategy</div>
+        <div class="company">Stripes</div>
+        
+        <p class="description">
+            I lead the Research and Growth Strategy team at <a href="https://stripes.co" target="_blank">Stripes</a>, helping us make investments and support our portfolio of amazing products.
+        </p>
+        
+        <p class="experience">
+            I was previously a Consultant at the New York office of <a href="https://bain.com" target="_blank">Bain & Company</a> working within the Private Equity Group, focused primarily on SaaS and fintech assets for VC, Growth Equity, and Crossover clients.<br><br>
+            Prior to that, I served as the VP of Growth at <a href="https://simondata.com" target="_blank">Simon Data</a>, an enterprise customer data platform, from Seed to Series C. Additionally, I've served as an independent investor, consultant and/or advisor to several early-stage SaaS companies in NYC working with companies like <a href="https://cedar.com" target="_blank">Cedar Health</a>, <a href="https://klara.com" target="_blank">Klara</a>, <a href="https://go-maestro.com" target="_blank">Maestro</a>, <a href="https://eigentech.com" target="_blank">Eigen</a>, <a href="https://goethena.com" target="_blank">Ethena</a>, and others.
+        </p>
+    </div>
+
+    <div class="footer">
+        <div class="location-time">
+            <span>New York City</span>
+            <span class="timestamp">8:22AM</span>
+        </div>
+        
+        <div class="social-links">
+            <a href="https://linkedin.com/in/basilalomary" target="_blank" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                </svg>
+            </a>
+            <a href="https://twitter.com/basil_alomary" target="_blank" aria-label="Twitter">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+            </a>
+            <a href="mailto:basil.a.alomary@gmail.com" aria-label="Email">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
 
     <script>
-        const terminal = document.getElementById('terminal');
-        const asciiArt = `
- ____            _ _    _    _                                
-|  _ \\          (_) |  / \\  | | ___  _ __ ___   __ _ _ __ _   _ 
-| |_) | __ _ ___ _| | / _ \\ | |/ _ \\| '_ \` _ \\ / _\` | '__| | | |
-|  _ < / _\` / __| | |/ ___ \\| | (_) | | | | | | (_| | |  | |_| |
-|_| \\_\\\\__,_\\___| |_/_/   \\_\\_|\\___/|_| |_| |_|\\__,_|_|   \\__, |
-                                                         |___/ 
-        `;
-
-        const content = [
-            { command: 'whoami', response: 'Basil Alomary' },
-            { command: 'cat current_role.txt', response: 'Head of Research at Stripes (http://www.stripes.co)' },
-            { command: 'ls previous_experience/', response: '- Bain_&_Company.txt\n- Simon_Data.txt\n- Independent_Investor.txt' },
-            { command: 'cat education.txt', response: 'Graduate of Columbia Business School\nGlenn Hubbard Scholarship Recipient' },
-            { command: 'ls fellowships/', response: 'VC_Fellow.txt  MBA_Associate.txt  Student_Fellow.txt  Venture_Partner.txt  InSITE_Fellow.txt' },
-            { command: 'cat writing/articles.txt', response: '1. Why Investors Should Focus More On The Infrastructure Supporting The AI Revolution\n2. OK, Boomer: How An Aging Population Is Going To Impact Real Estate Technology\n3. NFTs, like all art, are all about narrative\n4. "Where am I going to display my NFT?"... and other stupid questions\n5. The Future of InsurTech: Why serving policyholders has been the path to growth for so many...' },
-            { command: 'echo $CONTACT_INFO', response: 'LinkedIn: https://www.linkedin.com/in/basilalomary\nTwitter: https://twitter.com/basilalomary' },
-        ];
-
-        function typeWriter(text, element, index = 0) {
-            if (index < text.length) {
-                element.innerHTML += text.charAt(index);
-                setTimeout(() => typeWriter(text, element, index + 1), 20);
-            } else {
-                element.innerHTML += '<span class="blink">_</span>';
-            }
+        // Update timestamp to current time
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            document.querySelector('.timestamp').textContent = `${displayHours}:${minutes}${ampm}`;
         }
+        
+        updateTime();
+        setInterval(updateTime, 60000);
 
-        function createLoadingAnimation() {
-            const loading = document.createElement('div');
-            loading.className = 'loading';
-            loading.innerHTML = '|';
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        let mouseX = 0;
+        let mouseY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Smooth cursor animation
+        function animateCursor() {
+            const dx = mouseX - cursorX;
+            const dy = mouseY - cursorY;
             
-            const frames = ['|', '/', '-', '\\'];
-            let frameIndex = 0;
-
-            const intervalId = setInterval(() => {
-                loading.innerHTML = frames[frameIndex];
-                frameIndex = (frameIndex + 1) % frames.length;
-            }, 100);
-
-            return { element: loading, intervalId };
+            cursorX += dx * 0.15;
+            cursorY += dy * 0.15;
+            
+            cursor.style.transform = `translate(${cursorX - 20}px, ${cursorY - 20}px)`;
+            
+            requestAnimationFrame(animateCursor);
         }
+        animateCursor();
 
-        async function displayContent() {
-            const asciiElement = document.createElement('pre');
-            asciiElement.className = 'ascii-art';
-            terminal.appendChild(asciiElement);
-            await new Promise(resolve => typeWriter(asciiArt, asciiElement, 0, resolve));
+        // Add hover effect on interactive elements
+        const hoverElements = document.querySelectorAll('a, button');
+        hoverElements.forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.classList.add('hover');
+            });
+            element.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hover');
+            });
+        });
 
-            for (const item of content) {
-                const commandElement = document.createElement('div');
-                commandElement.className = 'command';
-                terminal.appendChild(commandElement);
-                await new Promise(resolve => typeWriter(`> ${item.command}`, commandElement, 0, resolve));
-
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                const { element: loadingElement, intervalId } = createLoadingAnimation();
-                terminal.appendChild(loadingElement);
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                clearInterval(intervalId);
-                loadingElement.remove();
-
-                const responseElement = document.createElement('div');
-                responseElement.className = 'response';
-                terminal.appendChild(responseElement);
-                await new Promise(resolve => typeWriter(item.response, responseElement, 0, resolve));
-
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-
-        displayContent();
+        // Hide cursor when it leaves the window
+        document.addEventListener('mouseleave', () => {
+            cursor.style.opacity = '0';
+        });
+        document.addEventListener('mouseenter', () => {
+            cursor.style.opacity = '1';
+        });
     </script>
 </body>
 </html>
