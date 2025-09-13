@@ -1,360 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Beans & Co. Grocery HQ</title>
+<!-- keep it out of search -->
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex"/>
+<meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet,noimageindex"/>
+
 <style>
-  /* ——— your original styles, unchanged except tiny comments ——— */
-  * { margin:0; padding:0; box-sizing:border-box }
-  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif; background:#fff; color:#37352f; line-height:1.5; padding:20px }
-  #welcomeScreen { position:fixed; inset:0; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); display:flex; align-items:center; justify-content:center; z-index:1000; transition:opacity .8s ease-out, transform .8s ease-out }
-  #welcomeScreen.hidden { display:none }
-  .welcome-content { text-align:center; color:#fff; padding:40px; animation:float 3s ease-in-out infinite }
-  .bean-emoji { font-size:80px; margin-bottom:20px; animation:bounce 1s ease-out }
-  .welcome-title { font-size:48px; font-weight:700; margin-bottom:16px; text-shadow:2px 2px 4px rgba(0,0,0,.1) }
-  .welcome-message { font-size:20px; opacity:.95; margin-bottom:30px; max-width:400px }
-  .food-emojis { display:flex; gap:20px; justify-content:center; font-size:30px; margin-bottom:30px }
-  .food-emojis span:nth-child(1){animation:wiggle 2s ease-in-out infinite}
-  .food-emojis span:nth-child(2){animation:wiggle 2s ease-in-out infinite .2s}
-  .food-emojis span:nth-child(3){animation:wiggle 2s ease-in-out infinite .4s}
-  .food-emojis span:nth-child(4){animation:wiggle 2s ease-in-out infinite .6s}
-  .food-emojis span:nth-child(5){animation:wiggle 2s ease-in-out infinite .8s}
-  .welcome-button{background:#fff;color:#764ba2;border:0;padding:14px 32px;border-radius:30px;font-size:18px;font-weight:600;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(0,0,0,.2)}
-  .welcome-button:hover{transform:scale(1.05)}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-  @keyframes bounce{0%{transform:scale(0) rotate(0)}50%{transform:scale(1.1) rotate(180deg)}100%{transform:scale(1) rotate(360deg)}}
-  @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
-  .container{max-width:900px;margin:0 auto;background:#fff}
-  .header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding:8px 0}
-  .header h1{font-size:40px;font-weight:700;letter-spacing:-.02em}
-  .header .icon{font-size:36px}
-  .sync-status{margin-left:auto;padding:6px 12px;background:#d4f4dd;color:#0a6e2e;border-radius:20px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
-  .sync-status.offline{background:#ffe0e0;color:#c00}
-  .sync-status .dot{width:8px;height:8px;background:#0a6e2e;border-radius:50%;animation:pulse 2s infinite}
-  .sync-status.offline .dot{background:#c00;animation:none}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-  .tabs{display:flex;gap:24px;margin-bottom:24px;border-bottom:1px solid #e0e0e0;padding-bottom:0}
-  .tab{padding:8px 4px;font-size:14px;font-weight:500;color:#787774;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;transition:all .2s}
-  .tab.active{color:#37352f;border-bottom-color:#37352f}
-  .tab:hover{color:#37352f}
-  .add-section{margin-bottom:20px;padding:20px;background:#f7f6f3;border-radius:8px}
-  .add-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .add-form input[type="text"]{flex:1;min-width:200px;padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px}
-  .add-form select{padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px;background:#fff}
-  .add-form input[type="number"]{width:80px;padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px}
-  .add-btn{background:#2383e2;color:#fff;border:0;padding:8px 20px;border-radius:4px;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s}
-  .add-btn:hover{background:#0070f3}
-  .section{margin-bottom:24px}
-  .section-header{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;user-select:none;margin-bottom:8px;font-size:14px;font-weight:600;color:#37352f}
-  .section-header:hover{background:#f7f6f3;border-radius:4px}
-  .table-header{display:grid;grid-template-columns:2fr 1fr 1fr 80px 80px 60px;gap:12px;padding:8px 12px;border-bottom:1px solid #e0e0e0;font-size:12px;font-weight:500;color:#787774;text-transform:uppercase;letter-spacing:.03em}
-  .item-row{display:grid;grid-template-columns:2fr 1fr 1fr 80px 80px 60px;gap:12px;padding:8px 12px;border-bottom:1px solid #f0f0f0;align-items:center;transition:background .2s}
-  .item-row:hover{background:#f7f6f3}
-  .item-name{font-size:14px;color:#37352f}
-  .store-section{background:#fdecc8;color:#9b6c00;padding:2px 8px;border-radius:4px;font-size:14px;display:inline-block;text-align:center}
-  .store-section.dairy{background:#d3e5ff;color:#0055cc}
-  .store-section.deli{background:#ffe0e0;color:#c00}
-  .store-section.produce{background:#d4f4dd;color:#0a6e2e}
-  .store-section.meat{background:#ffd4d1;color:#c30}
-  .store-section.frozen{background:#e0f4ff;color:#07c}
-  .store-section.other{background:#f0f0f0;color:#555}
-  .quantity-display{text-align:center;font-size:14px}
-  .checkbox{width:18px;height:18px;border:1.5px solid #e0e0e0;border-radius:3px;cursor:pointer;display:inline-block;position:relative;transition:all .2s}
-  .checkbox:hover{border-color:#37352f;background:#f7f6f3}
-  .checkbox.checked{background:#2383e2;border-color:#2383e2}
-  .checkbox.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:bold;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-  .delete-btn{background:transparent;border:0;color:#787774;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;transition:all .2s}
-  .delete-btn:hover{background:#f7f6f3;color:#c00}
-  .empty-state{text-align:center;padding:40px;color:#787774}
-  .loading{text-align:center;padding:40px;color:#787774}
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#9ca3af; --line:#23304a; --ink:#e5e7eb; --brand:#4f8cff; --brand2:#2e6fff;
+    --chip:#1b2538; --chip2:#172033; --good:#14b8a6; --warn:#f59e0b; --bad:#ef4444
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:18px}
+  a{color:inherit}
+
+  /* Password gate */
+  #gate{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#0b1220,#0d1426);}
+  #gate.hidden{display:none}
+  .gate-card{width:min(92vw,460px);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .gate-title{font-weight:800;font-size:20px;margin-bottom:4px}
+  .gate-sub{color:var(--muted);margin-bottom:14px}
+  .gate-row{display:flex;gap:8px}
+  .gate-input{flex:1;background:#0b1220;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px}
+  .gate-btn{background:var(--brand);border:0;border-radius:12px;color:#fff;padding:12px 16px;font-weight:700;cursor:pointer}
+  .gate-err{min-height:16px;color:#fca5a5;margin-top:8px}
+
+  /* Layout */
+  .wrap{max-width:980px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  header .logo{font-size:30px}
+  header h1{font-size:26px;margin:0}
+  .status{margin-left:auto;background:#0d2a1f;border:1px solid #1b4d3a;color:#86efac;border-radius:999px;padding:6px 10px;font-size:12px;display:flex;gap:6px;align-items:center}
+  .status.off{background:#2a1212;border-color:#4d1b1b;color:#fca5a5}
+  .dot{width:8px;height:8px;border-radius:50%;background:#34d399}
+
+  /* Controls row */
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .input{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink)}
+  .btn{background:var(--brand);border:0;color:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700}
+  .btn.secondary{background:var(--chip2)}
+  .btn.icon{padding:8px 10px}
+  .kbd{background:#0b1220;border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--muted);font-size:12px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:10px;border-bottom:1px solid var(--line)}
+  .tab{padding:10px 12px;border-radius:10px 10px 0 0;cursor:pointer;color:var(--muted)}
+  .tab.active{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-bottom:0}
+
+  /* Table-ish grid */
+  .section{margin-top:18px}
+  .section-head{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--chip);border:1px solid var(--line);border-radius:10px}
+  .section-actions{margin-left:auto;display:flex;gap:8px}
+  .row-head,.row{display:grid;grid-template-columns:2.2fr 1.1fr 110px 110px 110px 40px;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .row-head{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .row:hover{background:rgba(255,255,255,.03)}
+  .pill{background:#122038;border:1px solid #1a2946;color:#cdd9ff;border-radius:999px;padding:4px 8px;display:inline-flex;gap:6px;align-items:center}
+  .qty{display:inline-flex;align-items:center;gap:6px}
+  .qty input{width:52px;text-align:center} .qty .btn{padding:6px 10px}
+  .check{width:22px;height:22px;border-radius:6px;border:1.5px solid #2f3d5c;display:grid;place-items:center;cursor:pointer}
+  .check.on{background:var(--brand2);border-color:var(--brand2)}
+  .name[contenteditable]{outline:0;border-radius:8px}
+  .name[contenteditable]:focus{box-shadow:0 0 0 2px #2e6fff44}
+
+  /* Toast */
+  .toast{position:fixed;bottom:16px;right:16px;background:#101826;border:1px solid var(--line);padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(6px);transition:.25s}
+  .toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
-  <!-- Welcome Screen -->
-  <div id="welcomeScreen">
-    <div class="welcome-content">
-      <div class="bean-emoji">🫘</div>
-      <h1 class="welcome-title">Hi Beans!</h1>
-      <p class="welcome-message">Welcome to our magical grocery list where snacks appear and vegetables mysteriously disappear! 🪄</p>
-      <div class="food-emojis"><span>🥑</span><span>🥖</span><span>🧀</span><span>🍓</span><span>🥛</span></div>
-      <button class="welcome-button" onclick="hideWelcome()">Let's Shop! 🛒</button>
+
+<!-- PASSWORD GATE -->
+<div id="gate" role="dialog" aria-modal="true">
+  <div class="gate-card">
+    <div class="gate-title">Enter password</div>
+    <div class="gate-sub">Beans & Co. Grocery HQ</div>
+    <div class="gate-row">
+      <input id="gateInput" class="gate-input" type="password" placeholder="Password" autofocus/>
+      <button id="gateBtn" class="gate-btn">Unlock</button>
     </div>
+    <div id="gateErr" class="gate-err"></div>
   </div>
+</div>
 
-  <!-- Main App -->
-  <div class="container">
-    <div class="header">
-      <span class="icon">🛒</span><h1>Beans & Co. Grocery HQ</h1>
-      <div class="sync-status" id="syncStatus"><span class="dot"></span><span id="statusText">Connecting...</span></div>
-    </div>
+<div class="wrap" id="app" style="display:none">
+  <header>
+    <div class="logo">🛒</div><h1>Beans & Co. Grocery HQ</h1>
+    <div id="status" class="status off"><span class="dot" style="background:#ef4444"></span><span id="statusText">Offline</span></div>
+  </header>
 
-    <div class="tabs">
-      <div class="tab active" id="shoppingTab" onclick="switchTab('shopping')"><span>📋</span><span>Shopping List</span></div>
-      <div class="tab" id="inactiveTab" onclick="switchTab('inactive')"><span>📋</span><span>Inactive Items</span></div>
-    </div>
+  <div class="card" style="padding:14px">
+    <div class="controls">
+      <!-- Quick Add -->
+      <input id="quick" class="input" style="flex:1" placeholder="Quick Add: e.g. milk x2 @dairy, bread @bakery, apples 4"/>
+      <button id="quickBtn" class="btn">Add</button>
+      <span class="chip">Tip: <span class="kbd">Enter</span> adds • <span class="kbd">Cmd/Ctrl + K</span> focuses</span>
 
-    <div class="add-section">
-      <div class="add-form">
-        <input type="text" id="itemNameInput" placeholder="What do we need, Beans?"/>
-        <select id="sectionSelect">
-          <option value="Bakery">Bakery</option><option value="Dairy">Dairy</option><option value="Deli">Deli</option>
-          <option value="Produce">Produce</option><option value="Meat">Meat</option><option value="Frozen">Frozen</option><option value="Other">Other</option>
-        </select>
-        <input type="number" id="quantityInput" value="1" min="1"/>
-        <button class="add-btn" id="addBtn">Add Item</button>
+      <!-- Search -->
+      <input id="search" class="input" placeholder="Search items…"/>
+      <!-- Active/Inactive tabs -->
+      <div class="tabs" style="margin-left:auto">
+        <div id="tabActive" class="tab active">Shopping</div>
+        <div id="tabInactive" class="tab">Inactive</div>
       </div>
     </div>
 
-    <div id="shoppingList">
-      <div class="table-header"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div>Delete</div></div>
-      <div id="activeItems" class="loading">Connecting…</div>
-    </div>
-    <div id="inactiveList" style="display:none">
-      <div class="table-header"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div>Delete</div></div>
-      <div id="inactiveItems"></div>
-    </div>
+    <!-- Head -->
+    <div class="row-head"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div></div></div>
+    <!-- Lists -->
+    <div id="list"></div>
   </div>
+</div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<div id="toast" class="toast">Saved</div>
 
-  <script>
-    // ——— state ———
-    let groceryItems = {};
-    let currentTab = 'shopping';
-    const listId = 'beans-main-list';
-    let database = null;
-    let isConnected = false;
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    // ——— init auth + db ———
-    function initFirebase() {
-      try {
-        const firebaseConfig = {
-          apiKey: "AIzaSyCQpMDkuFNc1jWH1I_WQZ8Ev2UA2HgEGCI",
-          authDomain: "grocery-list-44616.firebaseapp.com",
-          databaseURL: "https://grocery-list-44616-default-rtdb.europe-west1.firebasedatabase.app",
-          projectId: "grocery-list-44616"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+<script>
+/*** Password gate (SHA-256) ***/
+const PASSWORD_HASH = "REPLACE_WITH_SHA256_HEX"; // <-- set this!
+async function sha256Hex(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function tryUnlock(){
+  const v=document.getElementById('gateInput').value||""; const ok=(await sha256Hex(v))===PASSWORD_HASH;
+  if(ok){ sessionStorage.setItem('grocery_authed','1'); document.getElementById('gate').classList.add('hidden'); document.getElementById('app').style.display='block'; initFirebase(); }
+  else { document.getElementById('gateErr').textContent='Incorrect password'; }
+}
+document.getElementById('gateBtn').onclick=tryUnlock;
+document.getElementById('gateInput').addEventListener('keypress',e=>{ if(e.key==='Enter') tryUnlock(); });
+if(sessionStorage.getItem('grocery_authed')==='1'){ document.getElementById('gate').classList.add('hidden'); document.getElementById('app').style.display='block'; setTimeout(initFirebase,0); }
 
-        // Sign in anonymously then attach DB listeners
-        firebase.auth().onAuthStateChanged(user => {
-          if (user) {
-            database = firebase.database();
-            setupFirebaseListeners();
-          } else {
-            firebase.auth().signInAnonymously().catch(console.error);
-          }
-        });
+/*** App state ***/
+const listId='beans-main-list';
+const SECTIONS=['Bakery','Dairy','Deli','Produce','Meat','Frozen','Other'];
+let database=null, grocery={}, filter='', showActive=true;
 
-        return true;
-      } catch (err) {
-        console.error('Firebase init error:', err);
-        updateConnectionStatus(false);
-        return false;
-      }
-    }
+/*** Firebase init (anonymous auth) ***/
+function initFirebase(){
+  const cfg={ apiKey:"AIzaSyCQpMDkuFNc1jWH1I_WQZ8Ev2UA2HgEGCI",
+    authDomain:"grocery-list-44616.firebaseapp.com",
+    databaseURL:"https://grocery-list-44616-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:"grocery-list-44616" };
+  if(!firebase.apps.length) firebase.initializeApp(cfg);
+  firebase.auth().onAuthStateChanged(u=>{
+    if(u){ database=firebase.database(); attach(); } else { firebase.auth().signInAnonymously().catch(console.error); }
+  });
+}
 
-    function setupFirebaseListeners() {
-      // main list
-      database.ref(`lists/${listId}/items`).on('value', (snap) => {
-        groceryItems = snap.val() || {};
-        renderItems();
-        updateConnectionStatus(true);
-      }, (err) => {
-        console.error('DB read error:', err);
-        updateConnectionStatus(false);
-      });
+function attach(){
+  database.ref(`lists/${listId}/items`).on('value', snap=>{
+    grocery=snap.val()||{}; render(); setOnline(true);
+  }, err=>{ console.error(err); setOnline(false);});
+  database.ref('.info/connected').on('value', s=> setOnline(s.val()===true));
+}
+function setOnline(on){
+  const st=document.getElementById('status'); const tx=document.getElementById('statusText'); const dot=st.querySelector('.dot');
+  if(on){ st.classList.remove('off'); tx.textContent='Connected'; dot.style.background='#34d399'; }
+  else  { st.classList.add('off'); tx.textContent='Offline'; dot.style.background='#ef4444'; }
+}
 
-      // connection
-      database.ref('.info/connected').on('value', (snap) => {
-        isConnected = snap.val() === true;
-        updateConnectionStatus(isConnected);
-      });
-    }
+/*** Utilities ***/
+const qs=(s,el=document)=>el.querySelector(s);
+const qsa=(s,el=document)=>[...el.querySelectorAll(s)];
+const clampInt=(v,d=1)=>{ const n=parseInt(v,10); return Number.isFinite(n)&&n>0? n:d; }
+const toast=(t='Saved')=>{ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),900); }
 
-    function updateConnectionStatus(connected) {
-      const statusEl = document.getElementById('syncStatus');
-      const statusText = document.getElementById('statusText');
-      if (connected) {
-        statusEl.className = 'sync-status';
-        statusText.textContent = 'Connected';
-      } else {
-        statusEl.className = 'sync-status offline';
-        statusText.textContent = 'Offline';
-      }
-    }
+/*** Quick Add parsing ***/
+function parseQuick(str){
+  // supports: "milk x2 @dairy", "apples 4", "bread", "milk@dairy", multiple items separated by commas
+  return str.split(',').map(p=>p.trim()).filter(Boolean).map(tok=>{
+    let name=tok, qty=1, sec='';
+    // section @tag
+    const mSec=tok.match(/@([a-z]+)$/i); if(mSec){ sec=mSec[1]; name=tok.replace(/@([a-z]+)$/i,'').trim(); }
+    // xN or N suffix
+    const mQty= name.match(/(?:x|\*)\s*(\d+)$/i) || name.match(/(\d+)$/);
+    if(mQty){ qty=parseInt(mQty[1],10)||1; name=name.replace(mQty[0],'').trim(); }
+    sec = (sec ? sec : '').toLowerCase();
+    const section = SECTIONS.find(s=>s.toLowerCase()===sec) || 'Other';
+    return {name, quantity: qty, section};
+  }).filter(it=>it.name.length>0);
+}
 
-    function hideWelcome() {
-      const welcome = document.getElementById('welcomeScreen');
-      welcome.style.opacity = '0';
-      welcome.style.transform = 'scale(0.9)';
-      setTimeout(() => { welcome.classList.add('hidden'); document.getElementById('itemNameInput').focus(); }, 800);
-    }
-    if (sessionStorage.getItem('welcomeShown')) {
-      document.getElementById('welcomeScreen').classList.add('hidden');
-    } else {
-      sessionStorage.setItem('welcomeShown','true');
-    }
+/*** Writes ***/
+function upsertItem({name,section,quantity}){
+  // If existing same name+section → bump quantity, else push new
+  const entries=Object.entries(grocery);
+  const found=entries.find(([id,it])=> it && it.name && it.name.toLowerCase()===name.toLowerCase() && it.section===section);
+  if(found){
+    const [id,it]=found;
+    return database.ref(`lists/${listId}/items/${id}`).update({
+      quantity: clampInt((it.quantity||0)+clampInt(quantity,1),1),
+      active:true,lastUpdated:Date.now()
+    });
+  }else{
+    const it={name,section,quantity:clampInt(quantity,1),purchased:false,active:true,createdAt:Date.now()};
+    return database.ref(`lists/${listId}/items`).push(it);
+  }
+}
 
-    // helpers
-    const clampInt = (v, d=1) => { const n = parseInt(v,10); return Number.isFinite(n) && n>0 ? n : d; };
+/*** Rendering ***/
+function render(){
+  const container=document.getElementById('list'); container.innerHTML='';
+  const arr=Object.entries(grocery).map(([id,it])=>({...it,id}));
+  const items=arr.filter(it=> (showActive? it.active: !it.active))
+                 .filter(it=> filter? it.name.toLowerCase().includes(filter)||it.section.toLowerCase().includes(filter):true);
 
-    // actions
-    function addItem() {
-      if (!database) { alert('Not connected yet.'); return; }
-      const nameInput = document.getElementById('itemNameInput');
-      const sectionSelect = document.getElementById('sectionSelect');
-      const quantityInput = document.getElementById('quantityInput');
+  // group by section
+  SECTIONS.forEach(sec=>{
+    const group=items.filter(it=>it.section===sec);
+    if(!group.length) return;
+    const secDiv=document.createElement('div'); secDiv.className='section';
+    const head=document.createElement('div'); head.className='section-head';
+    head.innerHTML=`<strong>${sec}</strong><span class="pill">${group.length}</span>`;
+    const acts=document.createElement('div'); acts.className='section-actions';
+    const bCollapse=btn('Collapse', 'secondary', ()=>toggleBlock(itemsDiv,head,sec));
+    const bMark=btn('Mark purchased', 'secondary', ()=>bulkPurchased(sec,true));
+    const bArchive=btn(showActive?'Move all to Inactive':'Reactivate all','secondary',()=>bulkActive(sec,!showActive));
+    acts.append(bCollapse,bMark,bArchive);
+    head.appendChild(acts);
 
-      const name = nameInput.value.trim();
-      if (!name) { nameInput.focus(); return; }
-      const qty = clampInt(quantityInput.value, 1);
+    const itemsDiv=document.createElement('div'); // rows holder
+    group.forEach(it=> itemsDiv.appendChild(row(it)));
 
-      // check for existing same-name+section
-      let updatedExisting = false;
-      for (const id in groceryItems) {
-        const it = groceryItems[id];
-        if (it && it.name && it.name.toLowerCase() === name.toLowerCase() && it.section === sectionSelect.value) {
-          database.ref(`lists/${listId}/items/${id}`).update({
-            quantity: clampInt((it.quantity || 0) + qty, 1),
-            active: true,
-            lastUpdated: Date.now()
-          }).catch(console.error);
-          updatedExisting = true;
-          break;
-        }
-      }
+    secDiv.append(head,itemsDiv);
+    container.appendChild(secDiv);
+  });
 
-      if (!updatedExisting) {
-        const newItem = { name, section: sectionSelect.value, quantity: qty, purchased: false, active: true, createdAt: Date.now() };
-        database.ref(`lists/${listId}/items`).push(newItem).catch(e => { console.error(e); alert('Failed to add item.'); });
-      }
+  if(!container.children.length){
+    const empty=document.createElement('div'); empty.style.padding='22px'; empty.style.color='var(--muted)';
+    empty.textContent = showActive ? 'No active items.' : 'No inactive items.';
+    container.appendChild(empty);
+  }
+}
+function btn(label,variant,fn){ const b=document.createElement('button'); b.className='btn '+(variant||''); b.textContent=label; b.onclick=fn; return b;}
+function toggleBlock(el,head,sec){
+  const vis=el.style.display!=='none'; el.style.display=vis?'none':'block';
+  head.querySelector('strong').textContent = (vis?'▶ ':'') + sec;
+}
 
-      nameInput.value = '';
-      quantityInput.value = '1';
-      nameInput.focus();
-    }
+function row(it){
+  const r=document.createElement('div'); r.className='row';
 
-    function createItemRow(item) {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      const sectionClass = (item.section || 'Other').toLowerCase().replace(/\s+/g,'-');
-      row.innerHTML = `
-        <div class="item-name">${item.name}</div>
-        <span class="store-section ${sectionClass}">${item.section}</span>
-        <div class="quantity-display">${item.quantity || 1}</div>
-        <div class="checkbox ${item.purchased ? 'checked' : ''}" onclick="togglePurchased('${item.id}')"></div>
-        <div class="checkbox ${item.active ? 'checked' : ''}" onclick="toggleActive('${item.id}')"></div>
-        <button class="delete-btn" onclick="deleteItem('${item.id}')">×</button>
-      `;
-      return row;
-    }
+  // name (contenteditable)
+  const name=document.createElement('div'); name.className='name'; name.contentEditable='true'; name.textContent=it.name;
+  name.addEventListener('blur',()=>{ const v=name.textContent.trim(); if(v && v!==it.name){ database.ref(`lists/${listId}/items/${it.id}`).update({name:v}); toast(); } else { name.textContent=it.name; }});
 
-    function renderItems() {
-      const activeContainer = document.getElementById('activeItems');
-      const inactiveContainer = document.getElementById('inactiveItems');
+  // section select
+  const sec=document.createElement('div');
+  const sel=document.createElement('select'); sel.className='input'; SECTIONS.forEach(s=>{ const o=new Option(s,s,s===it.section,s===it.section); sel.add(o); });
+  sel.onchange=()=> database.ref(`lists/${listId}/items/${it.id}`).update({section:sel.value}).then(()=>toast());
 
-      const itemsArray = Object.entries(groceryItems).map(([id, it]) => ({ ...it, id }));
-      const activeItems = itemsArray.filter(it => !!it.active);
-      const inactiveItems = itemsArray.filter(it => !it.active);
+  // qty with +/- and inline input
+  const qty=document.createElement('div'); qty.className='qty';
+  const minus=btn('−','icon',()=> setQty(it.id,(it.quantity||1)-1));
+  const input=document.createElement('input'); input.className='input'; input.value=it.quantity||1;
+  input.onblur=()=> setQty(it.id, input.value);
+  input.onkeypress=(e)=>{ if(e.key==='Enter'){ input.blur(); } };
+  const plus=btn('+','icon',()=> setQty(it.id,(it.quantity||1)+1));
+  qty.append(minus,input,plus);
 
-      activeContainer.className = '';
-      activeContainer.innerHTML = '';
-      inactiveContainer.innerHTML = '';
+  // purchased check
+  const purchased=document.createElement('div'); purchased.className='check '+(it.purchased?'on':''); purchased.onclick=()=>{
+    database.ref(`lists/${listId}/items/${it.id}`).update({purchased:!it.purchased}).then(()=>toast());
+  };
 
-      const sections = ['Bakery','Dairy','Deli','Produce','Meat','Frozen','Other'];
+  // active check
+  const active=document.createElement('div'); active.className='check '+(it.active?'on':''); active.onclick=()=>{
+    database.ref(`lists/${listId}/items/${it.id}`).update({active:!it.active}).then(()=>toast());
+  };
 
-      // active
-      if (activeItems.length === 0) {
-        activeContainer.innerHTML = '<div class="empty-state">No active items. Add your first item above!</div>';
-      } else {
-        sections.forEach(section => {
-          const group = activeItems.filter(it => it.section === section);
-          if (group.length) {
-            const secDiv = document.createElement('div');
-            secDiv.className = 'section';
-            const header = document.createElement('div');
-            header.className = 'section-header';
-            header.textContent = `▼ ${section}`;
-            const itemsDiv = document.createElement('div');
-            header.addEventListener('click', () => {
-              const visible = itemsDiv.style.display !== 'none';
-              itemsDiv.style.display = visible ? 'none' : 'block';
-              header.textContent = `${visible ? '▶' : '▼'} ${section}`;
-            });
-            secDiv.appendChild(header);
-            group.forEach(it => itemsDiv.appendChild(createItemRow(it)));
-            secDiv.appendChild(itemsDiv);
-            activeContainer.appendChild(secDiv);
-          }
-        });
-      }
+  // delete
+  const del=document.createElement('div'); const delBtn=btn('×','icon',()=>{ if(confirm('Delete this item?')) database.ref(`lists/${listId}/items/${it.id}`).remove().then(()=>toast('Deleted')); });
+  del.append(delBtn);
 
-      // inactive
-      if (inactiveItems.length === 0) {
-        inactiveContainer.innerHTML = '<div class="empty-state">No inactive items</div>';
-      } else {
-        sections.forEach(section => {
-          const group = inactiveItems.filter(it => it.section === section);
-          if (group.length) {
-            const secDiv = document.createElement('div');
-            secDiv.className = 'section';
-            const header = document.createElement('div');
-            header.className = 'section-header';
-            header.textContent = `▼ ${section}`;
-            const itemsDiv = document.createElement('div');
-            header.addEventListener('click', () => {
-              const visible = itemsDiv.style.display !== 'none';
-              itemsDiv.style.display = visible ? 'none' : 'block';
-              header.textContent = `${visible ? '▶' : '▼'} ${section}`;
-            });
-            secDiv.appendChild(header);
-            group.forEach(it => itemsDiv.appendChild(createItemRow(it)));
-            secDiv.appendChild(itemsDiv);
-            inactiveContainer.appendChild(secDiv);
-          }
-        });
-      }
-    }
+  sec.appendChild(sel); r.append(name,sec,qty,purchased,active,del);
+  return r;
+}
+function setQty(id,val){
+  const q=clampInt(val,1);
+  return database.ref(`lists/${listId}/items/${id}`).update({quantity:q}).then(()=>toast());
+}
 
-    function togglePurchased(id) {
-      if (!database) return;
-      const it = groceryItems[id];
-      if (it) database.ref(`lists/${listId}/items/${id}`).update({ purchased: !it.purchased }).catch(console.error);
-    }
-    function toggleActive(id) {
-      if (!database) return;
-      const it = groceryItems[id];
-      if (it) database.ref(`lists/${listId}/items/${id}`).update({ active: !it.active }).catch(console.error);
-    }
-    function deleteItem(id) {
-      if (!database) return;
-      if (confirm('Delete this item?')) database.ref(`lists/${listId}/items/${id}`).remove().catch(console.error);
-    }
+/*** Bulk ops ***/
+function bulkPurchased(section,val){
+  const upd={}; Object.entries(grocery).forEach(([id,it])=>{ if(it.section===section && (showActive? it.active: !it.active)) upd[id]={...it,purchased:val}; });
+  const updates={}; for(const id in upd){ updates[`lists/${listId}/items/${id}/purchased`]=val; }
+  if(Object.keys(updates).length) database.ref().update(updates).then(()=>toast('Marked purchased'));
+}
+function bulkActive(section,flag){
+  const updates={}; Object.entries(grocery).forEach(([id,it])=>{ if(it.section===section) updates[`lists/${listId}/items/${id}/active`]=flag; });
+  if(Object.keys(updates).length) database.ref().update(updates).then(()=>toast(flag?'Reactivated':'Archived'));
+}
 
-    function switchTab(tab) {
-      currentTab = tab;
-      const shoppingTab = document.getElementById('shoppingTab');
-      const inactiveTab = document.getElementById('inactiveTab');
-      const shoppingList = document.getElementById('shoppingList');
-      const inactiveList = document.getElementById('inactiveList');
-      if (tab === 'shopping') {
-        shoppingTab.classList.add('active'); inactiveTab.classList.remove('active');
-        shoppingList.style.display = 'block'; inactiveList.style.display = 'none';
-      } else {
-        shoppingTab.classList.remove('active'); inactiveTab.classList.add('active');
-        shoppingList.style.display = 'none'; inactiveList.style.display = 'block';
-      }
-    }
+/*** Controls wiring ***/
+document.getElementById('quickBtn').onclick=()=>{
+  const t=qs('#quick').value.trim(); if(!t) return;
+  const items=parseQuick(t); if(!items.length) return;
+  Promise.all(items.map(upsertItem)).then(()=>{ qs('#quick').value=''; toast('Added'); });
+};
+qs('#quick').addEventListener('keypress',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('quickBtn').click(); } });
+qs('#search').addEventListener('input',e=>{ filter=e.target.value.trim().toLowerCase(); render(); });
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); qs('#quick').focus(); }});
+qs('#tabActive').onclick=()=>{ showActive=true; qs('#tabActive').classList.add('active'); qs('#tabInactive').classList.remove('active'); render(); };
+qs('#tabInactive').onclick=()=>{ showActive=false; qs('#tabInactive').classList.add('active'); qs('#tabActive').classList.remove('active'); render(); };
+</script>
 
-    document.getElementById('itemNameInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addItem(); });
-    document.getElementById('addBtn').addEventListener('click', addItem);
-
-    window.addEventListener('load', () => { initFirebase(); });
-  </script>
 </body>
 </html>
