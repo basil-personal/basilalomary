@@ -79,50 +79,6 @@
             50% { opacity: 0.5; }
         }
 
-        .share-section {
-            background: #f7f6f3;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .share-section h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .share-url {
-            display: flex;
-            gap: 8px;
-        }
-
-        .share-url input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 12px;
-            font-family: monospace;
-            background: white;
-        }
-
-        .copy-btn {
-            background: #2383e2;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #0070f3;
-        }
-
         .tabs {
             display: flex;
             gap: 24px;
@@ -388,14 +344,6 @@
             <div class="sync-status" id="syncStatus">
                 <span class="dot"></span>
                 <span>Connected</span>
-            </div>
-        </div>
-
-        <div class="share-section">
-            <h3>Share this list:</h3>
-            <div class="share-url">
-                <input type="text" id="shareUrl" readonly value="Loading...">
-                <button class="copy-btn" id="copyBtn">Copy Link</button>
             </div>
         </div>
 
@@ -735,23 +683,10 @@
             }
         }
 
-        // Copy share URL
-        window.copyShareUrl = function() {
-            const shareUrl = document.getElementById('shareUrl');
-            shareUrl.select();
-            document.execCommand('copy');
-            
-            const btn = document.getElementById('copyBtn');
-            const originalText = btn.textContent;
-            btn.textContent = 'Copied!';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 2000);
-        }
-
+        // Copy share URL - removed since we don't need it anymore
+        
         // Set up event listeners
         document.getElementById('addButton').addEventListener('click', () => window.addItem());
-        document.getElementById('copyBtn').addEventListener('click', () => window.copyShareUrl());
         
         document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
