@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery List</title>
+    <title>Grocery List - Shared</title>
     <style>
         * {
             margin: 0;
@@ -41,6 +41,86 @@
 
         .header .icon {
             font-size: 36px;
+        }
+
+        .sync-status {
+            margin-left: auto;
+            padding: 6px 12px;
+            background: #d4f4dd;
+            color: #0a6e2e;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sync-status.offline {
+            background: #ffe0e0;
+            color: #cc0000;
+        }
+
+        .sync-status .dot {
+            width: 8px;
+            height: 8px;
+            background: #0a6e2e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-status.offline .dot {
+            background: #cc0000;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .share-section {
+            background: #f7f6f3;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .share-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .share-url {
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-url input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            background: white;
+        }
+
+        .copy-btn {
+            background: #2383e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #0070f3;
         }
 
         .tabs {
@@ -85,10 +165,12 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .add-form input[type="text"] {
             flex: 1;
+            min-width: 200px;
             padding: 8px 12px;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
@@ -279,6 +361,23 @@
             padding: 40px;
             color: #787774;
         }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #787774;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
     </style>
 </head>
 <body>
@@ -286,6 +385,18 @@
         <div class="header">
             <span class="icon">🛒</span>
             <h1>Grocery List</h1>
+            <div class="sync-status" id="syncStatus">
+                <span class="dot"></span>
+                <span>Connected</span>
+            </div>
+        </div>
+
+        <div class="share-section">
+            <h3>Share this list:</h3>
+            <div class="share-url">
+                <input type="text" id="shareUrl" readonly value="Loading...">
+                <button class="copy-btn" id="copyBtn">Copy Link</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -325,7 +436,7 @@
                 <div>Active</div>
                 <div>Delete</div>
             </div>
-            <div id="activeItems"></div>
+            <div id="activeItems" class="loading">Loading items</div>
         </div>
 
         <div id="inactiveList" style="display: none;">
@@ -341,45 +452,99 @@
         </div>
     </div>
 
-    <script>
-        // Initialize data
-        let groceryItems = [];
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            onValue, 
+            push, 
+            remove,
+            onDisconnect,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQpMDkuFNc1jWH1I_WQZ8Ev2UA2HgEGCI",
+            authDomain: "grocery-list-44616.firebaseapp.com",
+            databaseURL: "https://grocery-list-44616-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "grocery-list-44616",
+            storageBucket: "grocery-list-44616.firebasestorage.app",
+            messagingSenderId: "27061694844",
+            appId: "1:27061694844:web:44c2d6068de8e5160df4f9",
+            measurementId: "G-TGXQ3XET47"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Global variables
+        let groceryItems = {};
         let listId = '';
         let currentTab = 'shopping';
+        let listRef = null;
 
-        // Get or create list ID
+        // Initialize
         function initializeList() {
             const urlParams = new URLSearchParams(window.location.search);
             listId = urlParams.get('list');
             
             if (!listId) {
-                listId = 'list_' + Date.now();
+                // Create new list
+                listId = generateListId();
                 window.history.replaceState({}, '', `?list=${listId}`);
             }
             
-            loadItems();
+            // Update share URL
+            const shareUrl = window.location.href;
+            document.getElementById('shareUrl').value = shareUrl;
+            
+            // Set up Firebase reference
+            listRef = ref(database, `lists/${listId}/items`);
+            
+            // Listen for changes
+            onValue(listRef, (snapshot) => {
+                const data = snapshot.val();
+                groceryItems = data || {};
+                renderItems();
+                
+                // Update sync status
+                updateSyncStatus(true);
+            }, (error) => {
+                console.error('Firebase error:', error);
+                updateSyncStatus(false);
+            });
+            
+            // Monitor connection
+            const connectedRef = ref(database, '.info/connected');
+            onValue(connectedRef, (snapshot) => {
+                updateSyncStatus(snapshot.val() === true);
+            });
         }
 
-        // Load items from localStorage
-        function loadItems() {
-            const saved = localStorage.getItem(listId);
-            if (saved) {
-                try {
-                    groceryItems = JSON.parse(saved);
-                } catch (e) {
-                    groceryItems = [];
-                }
+        // Generate random list ID
+        function generateListId() {
+            return Math.random().toString(36).substring(2, 15);
+        }
+
+        // Update sync status indicator
+        function updateSyncStatus(connected) {
+            const statusEl = document.getElementById('syncStatus');
+            if (connected) {
+                statusEl.className = 'sync-status';
+                statusEl.innerHTML = '<span class="dot"></span><span>Connected</span>';
+            } else {
+                statusEl.className = 'sync-status offline';
+                statusEl.innerHTML = '<span class="dot"></span><span>Offline</span>';
             }
-            renderItems();
-        }
-
-        // Save items to localStorage
-        function saveItems() {
-            localStorage.setItem(listId, JSON.stringify(groceryItems));
         }
 
         // Add new item
-        function addItem() {
+        window.addItem = function() {
             const nameInput = document.getElementById('itemNameInput');
             const sectionSelect = document.getElementById('sectionSelect');
             const quantityInput = document.getElementById('quantityInput');
@@ -388,55 +553,69 @@
             if (!name) return;
             
             // Check if item exists in same section
-            const existingItem = groceryItems.find(item => 
-                item.name.toLowerCase() === name.toLowerCase() && 
-                item.section === sectionSelect.value
-            );
+            let foundExisting = false;
+            for (let id in groceryItems) {
+                const item = groceryItems[id];
+                if (item.name.toLowerCase() === name.toLowerCase() && 
+                    item.section === sectionSelect.value) {
+                    // Update existing item
+                    const updates = {
+                        ...item,
+                        quantity: item.quantity + parseInt(quantityInput.value),
+                        active: true,
+                        lastUpdated: Date.now()
+                    };
+                    set(ref(database, `lists/${listId}/items/${id}`), updates);
+                    foundExisting = true;
+                    break;
+                }
+            }
             
-            if (existingItem) {
-                // Aggregate quantity
-                existingItem.quantity += parseInt(quantityInput.value);
-                existingItem.active = true; // Make it active
-            } else {
+            if (!foundExisting) {
                 // Add new item
-                const newItem = {
-                    id: 'item_' + Date.now(),
+                const newItemRef = push(listRef);
+                set(newItemRef, {
                     name: name,
                     section: sectionSelect.value,
                     quantity: parseInt(quantityInput.value),
                     purchased: false,
-                    active: true
-                };
-                groceryItems.push(newItem);
+                    active: true,
+                    createdAt: Date.now(),
+                    lastUpdated: Date.now()
+                });
             }
             
             // Clear inputs
             nameInput.value = '';
             quantityInput.value = '1';
-            
-            saveItems();
-            renderItems();
+            nameInput.focus();
         }
 
-        // Render all items
+        // Render items
         function renderItems() {
             const activeContainer = document.getElementById('activeItems');
             const inactiveContainer = document.getElementById('inactiveItems');
             
+            // Convert object to array and separate
+            const itemsArray = Object.entries(groceryItems).map(([id, item]) => ({
+                ...item,
+                id: id
+            }));
+            
+            const activeItems = itemsArray.filter(item => item.active);
+            const inactiveItems = itemsArray.filter(item => !item.active);
+            
             // Clear containers
             activeContainer.innerHTML = '';
+            activeContainer.className = '';
             inactiveContainer.innerHTML = '';
-            
-            // Separate active and inactive
-            const activeItems = groceryItems.filter(item => item.active);
-            const inactiveItems = groceryItems.filter(item => !item.active);
             
             // Group by section
             const sections = ['Bakery', 'Dairy', 'Deli', 'Produce', 'Meat', 'Frozen', 'Other'];
             
             // Render active items
             if (activeItems.length === 0) {
-                activeContainer.innerHTML = '<div class="empty-state">No active items</div>';
+                activeContainer.innerHTML = '<div class="empty-state">No active items. Add your first item above!</div>';
             } else {
                 sections.forEach(section => {
                     const sectionItems = activeItems.filter(item => item.section === section);
@@ -487,7 +666,7 @@
             }
         }
 
-        // Create item row element
+        // Create item row
         function createItemRow(item) {
             const row = document.createElement('div');
             row.className = 'item-row';
@@ -503,44 +682,40 @@
                 <button class="delete-btn" data-id="${item.id}">×</button>
             `;
             
-            // Add event listeners to checkboxes
+            // Add event listeners
             row.querySelectorAll('.checkbox').forEach(checkbox => {
                 checkbox.addEventListener('click', handleCheckbox);
             });
             
-            // Add event listener to delete button
             row.querySelector('.delete-btn').addEventListener('click', handleDelete);
             
             return row;
         }
 
-        // Handle checkbox clicks
+        // Handle checkbox
         function handleCheckbox(e) {
             const id = e.target.dataset.id;
             const type = e.target.dataset.type;
-            const item = groceryItems.find(i => i.id === id);
+            const item = groceryItems[id];
             
             if (item) {
-                if (type === 'purchased') {
-                    item.purchased = !item.purchased;
-                } else if (type === 'active') {
-                    item.active = !item.active;
-                }
-                saveItems();
-                renderItems();
+                const updates = {
+                    ...item,
+                    [type]: !item[type],
+                    lastUpdated: Date.now()
+                };
+                set(ref(database, `lists/${listId}/items/${id}`), updates);
             }
         }
 
         // Handle delete
         function handleDelete(e) {
             const id = e.target.dataset.id;
-            groceryItems = groceryItems.filter(item => item.id !== id);
-            saveItems();
-            renderItems();
+            remove(ref(database, `lists/${listId}/items/${id}`));
         }
 
         // Switch tabs
-        function switchTab(tab) {
+        window.switchTab = function(tab) {
             currentTab = tab;
             const shoppingTab = document.getElementById('shoppingTab');
             const inactiveTab = document.getElementById('inactiveTab');
@@ -560,36 +735,37 @@
             }
         }
 
+        // Copy share URL
+        window.copyShareUrl = function() {
+            const shareUrl = document.getElementById('shareUrl');
+            shareUrl.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
         // Set up event listeners
-        document.getElementById('addButton').addEventListener('click', addItem);
+        document.getElementById('addButton').addEventListener('click', () => window.addItem());
+        document.getElementById('copyBtn').addEventListener('click', () => window.copyShareUrl());
         
         document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                addItem();
+                window.addItem();
             }
         });
         
         document.getElementById('shoppingTab').addEventListener('click', () => {
-            switchTab('shopping');
+            window.switchTab('shopping');
         });
         
         document.getElementById('inactiveTab').addEventListener('click', () => {
-            switchTab('inactive');
+            window.switchTab('inactive');
         });
-
-        // Auto-sync
-        setInterval(() => {
-            const saved = localStorage.getItem(listId);
-            if (saved) {
-                try {
-                    const newItems = JSON.parse(saved);
-                    if (JSON.stringify(newItems) !== JSON.stringify(groceryItems)) {
-                        groceryItems = newItems;
-                        renderItems();
-                    }
-                } catch (e) {}
-            }
-        }, 2000);
 
         // Initialize on load
         initializeList();
