@@ -1,48 +1,254 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Protected Grocery Page</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: #f5f5f5;
-      }
-      #login {
-        text-align: center;
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      }
-      input {
-        padding: 8px;
-        margin: 5px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="login">
-      <h2>Enter Password</h2>
-      <input type="password" id="pw" placeholder="Password">
-      <button onclick="checkPassword()">Enter</button>
-      <p id="error" style="color:red;"></p>
-    </div>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grocery List</title>
+<style>
+  :root { --bg:#f9f9f9; --card:#fff; --muted:#666; --line:#e6e6e6; --brand:#0b69d0; --brand2:#0652a3; }
+  * { box-sizing: border-box }
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:var(--bg); color:#222 }
+  header { padding:24px 24px 12px }
+  h1 { margin:0 0 6px; font-size:28px }
+  .muted { color:var(--muted); font-size:14px }
+  .tabs { display:flex; gap:8px; padding:0 24px 12px }
+  .tab { padding:8px 12px; border:1px solid var(--line); border-bottom:none; background:#f3f6fb; cursor:pointer; border-radius:8px 8px 0 0 }
+  .tab.active { background:var(--card); color:#000; }
+  .card { background:var(--card); margin:0 24px 24px; border:1px solid var(--line); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05) }
+  .bar { display:flex; gap:10px; flex-wrap:wrap; padding:16px; align-items:center; border-bottom:1px solid var(--line) }
+  input[type="text"], input[type="number"], select { padding:8px; border:1px solid #ccc; border-radius:8px }
+  input[type="number"]{ width:110px }
+  button { padding:10px 14px; border:0; border-radius:10px; background:var(--brand); color:#fff; cursor:pointer; font-weight:600 }
+  button:disabled { opacity:.6; cursor:not-allowed }
+  button.secondary { background:#e9eef7; color:#0b397a }
+  table { width:100%; border-collapse:collapse }
+  th, td { border-top:1px solid var(--line); padding:12px 14px; vertical-align:middle }
+  th { background:#f6f7fb; text-align:left; font-weight:600 }
+  td input[type="text"], td input[type="number"], td select { width:100% }
+  .right { margin-left:auto }
+  .status { color:var(--muted) }
+  .pill { display:inline-block; padding:2px 8px; background:#eef3ff; border-radius:999px; font-size:12px }
+  .row-actions { display:flex; gap:8px; justify-content:flex-end }
+  .empty { padding:24px; color:var(--muted) }
+</style>
+</head>
+<body>
+<header>
+  <h1>Grocery List</h1>
+  <div class="muted">Active shopping list with sections, Purchased & Active flags. Inactive items are archived but easily restored.</div>
+</header>
 
-    <script>
-      function checkPassword() {
-        const input = document.getElementById('pw').value
-        const correct = "secret123" // change this password
-        if (input === correct) {
-          window.location.href = "protected.html"
-        } else {
-          document.getElementById('error').textContent = "Incorrect password"
-        }
-      }
-    </script>
-  </body>
+<div class="tabs">
+  <div class="tab active" data-tab="active">🛒 Shopping List</div>
+  <div class="tab" data-tab="inactive">🗂️ Inactive Items</div>
+</div>
+
+<div class="card">
+  <div class="bar">
+    <input id="newItem" type="text" placeholder="New item" />
+    <select id="newSection"></select>
+    <input id="newQty" type="number" step="0.1" min="0" value="1" />
+    <label><input id="newActive" type="checkbox" checked /> Active</label>
+    <button id="addBtn">Add</button>
+    <div class="right status" id="status">Loading…</div>
+  </div>
+
+  <div id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:34%">Item</th>
+          <th style="width:22%">Store Section</th>
+          <th style="width:14%">Quantity</th>
+          <th style="width:14%">Purchased</th>
+          <th style="width:16%">Active</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" class="empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // ===== Config =====
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzEDHwuTsRTgPlitfqd-eYkyMW6EcvhNDaVykx48ZdpXeoemK5HOz6f63zmXEnmjGJFRw/exec";
+  const SECTIONS = ["Bakery","Dairy","Deli","Produce","Pantry","Frozen","Beverages","Misc"];
+
+  // ===== EL helpers =====
+  const $ = (id) => document.getElementById(id);
+  const qs = (sel, el=document) => el.querySelector(sel);
+  const qsa = (sel, el=document) => [...el.querySelectorAll(sel)];
+  function sectionSelect(value) {
+    const sel = document.createElement("select");
+    SECTIONS.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s; opt.textContent = s; sel.appendChild(opt);
+    });
+    sel.value = value || SECTIONS[0];
+    return sel;
+  }
+  function boolBox(checked) { const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!checked; return cb; }
+  function textInput(v){ const i=document.createElement("input"); i.type="text"; i.value=v||""; return i; }
+  function numInput(v){ const i=document.createElement("input"); i.type="number"; i.step="0.1"; i.min="0"; i.value=v||"1"; return i; }
+  const toTF = b => b ? "TRUE" : "FALSE";
+
+  // ===== API (GAS) =====
+  async function apiList() {
+    const url = `${GAS_URL}?action=list&_=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to load");
+    return res.json();
+  }
+  async function apiUpdate(rowIndex, values) {
+    const res = await fetch(GAS_URL, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"update", rowIndex, values })
+    });
+    if (!res.ok) throw new Error("Update failed");
+    return res.json();
+  }
+  async function apiAppend(values) {
+    const res = await fetch(GAS_URL, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"append", values })
+    });
+    if (!res.ok) throw new Error("Append failed");
+    return res.json();
+  }
+
+  // ===== State =====
+  let allRows = [];      // raw values[][] from sheet
+  let activeTab = "active"; // "active" | "inactive"
+
+  // ===== Rendering =====
+  function setStatus(t){ $("status").textContent = t; }
+
+  function render() {
+    const tbody = $("tbody");
+    tbody.innerHTML = "";
+
+    if (!allRows || allRows.length <= 1) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty">No data yet</td></tr>`;
+      return;
+    }
+    // header:
+    // 0: Item, 1: Section, 2: Qty, 3: Purchased, 4: Active
+    for (let i=1; i<allRows.length; i++) {
+      const row = allRows[i];
+      const isActive = (row[4] === "TRUE");
+      if (activeTab === "active" && !isActive) continue;
+      if (activeTab === "inactive" && isActive) continue;
+
+      const [item, section, qty, purchased, active] = [
+        row[0] || "",
+        row[1] || SECTIONS[0],
+        row[2] || "1",
+        row[3] === "TRUE",
+        row[4] === "TRUE"
+      ];
+      const rowIndex = i + 1; // includes header
+
+      const tr = document.createElement("tr");
+      // Item
+      const tdItem = document.createElement("td"); const inItem = textInput(item); tdItem.appendChild(inItem);
+      // Section
+      const tdSec = document.createElement("td"); const inSec = sectionSelect(section); tdSec.appendChild(inSec);
+      // Qty
+      const tdQty = document.createElement("td"); const inQty = numInput(qty); tdQty.appendChild(inQty);
+      // Purchased
+      const tdPur = document.createElement("td"); const inPur = boolBox(purchased); tdPur.appendChild(inPur);
+      // Active
+      const tdAct = document.createElement("td"); const inAct = boolBox(active); tdAct.appendChild(inAct);
+
+      tr.appendChild(tdItem); tr.appendChild(tdSec); tr.appendChild(tdQty); tr.appendChild(tdPur); tr.appendChild(tdAct);
+      tbody.appendChild(tr);
+
+      // Save on change
+      [inItem, inSec, inQty, inPur, inAct].forEach(ctrl => {
+        ctrl.addEventListener("change", async () => {
+          try {
+            setStatus("Saving…");
+            await apiUpdate(rowIndex, [
+              inItem.value.trim(),
+              inSec.value,
+              inQty.value,
+              toTF(inPur.checked),
+              toTF(inAct.checked)
+            ]);
+            // update local cache then optionally re-filter
+            allRows[rowIndex-1] = [inItem.value.trim(), inSec.value, inQty.value, toTF(inPur.checked), toTF(inAct.checked)];
+            // If user just flipped Active, re-render to move rows between tabs
+            render();
+            setStatus("Saved");
+          } catch (e) {
+            console.error(e);
+            setStatus("Save failed");
+          }
+        });
+      });
+    }
+
+    // Empty state per tab
+    if (!tbody.children.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty">${
+        activeTab === "active" ? "No active items" : "No inactive items"
+      }</td></tr>`;
+    }
+  }
+
+  async function load() {
+    setStatus("Loading…");
+    try {
+      const data = await apiList();
+      allRows = data.values || [];
+      render();
+      setStatus("Loaded");
+    } catch(e) {
+      console.error(e);
+      setStatus("Load failed");
+      $("tbody").innerHTML = `<tr><td colspan="5" class="empty" style="color:#c00">Error loading data</td></tr>`;
+    }
+  }
+
+  // ===== Add new item =====
+  function populateNewSection() {
+    const sel = $("newSection");
+    SECTIONS.forEach(s => { const o=document.createElement("option"); o.value=s; o.textContent=s; sel.appendChild(o); });
+  }
+  async function addNew() {
+    const name = $("newItem").value.trim();
+    const sec = $("newSection").value;
+    const qty = $("newQty").value;
+    const act = $("newActive").checked;
+    if (!name) return alert("Enter an item name");
+    try {
+      setStatus("Adding…");
+      await apiAppend([name, sec, qty, "FALSE", toTF(act)]);
+      $("newItem").value = ""; $("newQty").value = "1"; $("newActive").checked = true;
+      await load();
+      setStatus("Added");
+    } catch (e) {
+      console.error(e);
+      setStatus("Add failed");
+    }
+  }
+
+  // ===== Tabs =====
+  function setTab(tab) {
+    activeTab = tab;
+    qsa(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+    render();
+  }
+
+  // Boot
+  document.addEventListener("DOMContentLoaded", () => {
+    populateNewSection();
+    $("addBtn").addEventListener("click", addNew);
+    qsa(".tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
+    load();
+  });
+</script>
+</body>
 </html>
