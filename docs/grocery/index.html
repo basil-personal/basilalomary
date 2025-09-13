@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Protected Grocery Page</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f5f5f5;
+      }
+      #login {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      }
+      input {
+        padding: 8px;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login">
+      <h2>Enter Password</h2>
+      <input type="password" id="pw" placeholder="Password">
+      <button onclick="checkPassword()">Enter</button>
+      <p id="error" style="color:red;"></p>
+    </div>
+
+    <script>
+      function checkPassword() {
+        const input = document.getElementById('pw').value
+        const correct = "secret123" // change this password
+        if (input === correct) {
+          window.location.href = "protected.html"
+        } else {
+          document.getElementById('error').textContent = "Incorrect password"
+        }
+      }
+    </script>
+  </body>
+</html>
