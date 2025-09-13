@@ -2,30 +2,45 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Beans & Co. Grocery HQ</title>
-<!-- keep it out of search -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ashbaugh–Alomary Grocery List</title>
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex"/>
 <meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet,noimageindex"/>
 
 <style>
   :root{
-    --bg:#0b1220; --card:#0f172a; --muted:#9ca3af; --line:#23304a; --ink:#e5e7eb; --brand:#4f8cff; --brand2:#2e6fff;
-    --chip:#1b2538; --chip2:#172033; --good:#14b8a6; --warn:#f59e0b; --bad:#ef4444
+    /* palette */
+    --bg:#0b1220; --card:#0f172a; --ink:#e5e7eb; --muted:#9ca3af; --line:#23304a;
+    --brand:#4f8cff; --brand2:#2e6fff; --chip:#1b2538; --chip2:#172033;
+    --ok:#34d399; --bad:#ef4444;
+
+    /* sizing */
+    --h:38px;            /* standard control height */
+    --pad:10px;
+    --radius:12px;
+
+    /* table columns (desktop) */
+    --col-name: 2.2fr;
+    --col-sec:  1.05fr;
+    --col-qty:  120px;
+    --col-p:     96px;
+    --col-a:     96px;
+    --col-x:     44px;
   }
+
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:18px}
-  a{color:inherit}
+  a{color:inherit;text-decoration:none}
 
   /* Password gate */
-  #gate{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#0b1220,#0d1426);}
+  #gate{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#0b1220,#0d1426);z-index:10}
   #gate.hidden{display:none}
   .gate-card{width:min(92vw,460px);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
   .gate-title{font-weight:800;font-size:20px;margin-bottom:4px}
   .gate-sub{color:var(--muted);margin-bottom:14px}
   .gate-row{display:flex;gap:8px}
-  .gate-input{flex:1;background:#0b1220;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px}
-  .gate-btn{background:var(--brand);border:0;border-radius:12px;color:#fff;padding:12px 16px;font-weight:700;cursor:pointer}
+  .gate-input{flex:1;background:#0b1220;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;height:var(--h)}
+  .gate-btn{background:var(--brand);border:0;border-radius:12px;color:#fff;padding:0 16px;font-weight:700;cursor:pointer;height:var(--h)}
   .gate-err{min-height:16px;color:#fca5a5;margin-top:8px}
 
   /* Layout */
@@ -36,40 +51,71 @@
   header h1{font-size:26px;margin:0}
   .status{margin-left:auto;background:#0d2a1f;border:1px solid #1b4d3a;color:#86efac;border-radius:999px;padding:6px 10px;font-size:12px;display:flex;gap:6px;align-items:center}
   .status.off{background:#2a1212;border-color:#4d1b1b;color:#fca5a5}
-  .dot{width:8px;height:8px;border-radius:50%;background:#34d399}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 
-  /* Controls row */
+  /* Controls */
   .controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
-  .chip{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .input{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink)}
-  .btn{background:var(--brand);border:0;color:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700}
+  .input, select{background:#0b1220;border:1px solid var(--line);border-radius:var(--radius);padding:0 12px;color:var(--ink);height:var(--h)}
+  .btn{background:var(--brand);border:0;color:#fff;border-radius:var(--radius);padding:0 14px;cursor:pointer;font-weight:700;height:var(--h)}
   .btn.secondary{background:var(--chip2)}
-  .btn.icon{padding:8px 10px}
+  .btn.icon{width:var(--h);padding:0}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:8px 10px;color:var(--muted)}
   .kbd{background:#0b1220;border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--muted);font-size:12px}
 
   /* Tabs */
-  .tabs{display:flex;gap:10px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:10px;border-bottom:1px solid var(--line);margin-left:auto}
   .tab{padding:10px 12px;border-radius:10px 10px 0 0;cursor:pointer;color:var(--muted)}
   .tab.active{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-bottom:0}
 
-  /* Table-ish grid */
+  /* Table */
+  .row-head,.row{display:grid;grid-template-columns:var(--col-name) var(--col-sec) var(--col-qty) var(--col-p) var(--col-a) var(--col-x);gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);align-items:center}
+  .row-head{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .row:hover{background:rgba(255,255,255,.03)}
+  .name[contenteditable]{outline:0;border-radius:8px;padding:8px}
+  .name[contenteditable]:focus{box-shadow:0 0 0 2px #2e6fff44}
+  .select{width:100%}
+  .qty{display:flex;align-items:center;gap:6px}
+  .qty input{width:58px;text-align:center}
+  .check{width:var(--h);height:var(--h);border-radius:10px;border:1.5px solid #2f3d5c;display:grid;place-items:center;cursor:pointer}
+  .check.on{background:var(--brand2);border-color:var(--brand2)}
+  .del{text-align:center}
+
+  /* Section header row */
   .section{margin-top:18px}
   .section-head{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--chip);border:1px solid var(--line);border-radius:10px}
   .section-actions{margin-left:auto;display:flex;gap:8px}
-  .row-head,.row{display:grid;grid-template-columns:2.2fr 1.1fr 110px 110px 110px 40px;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
-  .row-head{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-  .row:hover{background:rgba(255,255,255,.03)}
   .pill{background:#122038;border:1px solid #1a2946;color:#cdd9ff;border-radius:999px;padding:4px 8px;display:inline-flex;gap:6px;align-items:center}
-  .qty{display:inline-flex;align-items:center;gap:6px}
-  .qty input{width:52px;text-align:center} .qty .btn{padding:6px 10px}
-  .check{width:22px;height:22px;border-radius:6px;border:1.5px solid #2f3d5c;display:grid;place-items:center;cursor:pointer}
-  .check.on{background:var(--brand2);border-color:var(--brand2)}
-  .name[contenteditable]{outline:0;border-radius:8px}
-  .name[contenteditable]:focus{box-shadow:0 0 0 2px #2e6fff44}
 
   /* Toast */
   .toast{position:fixed;bottom:16px;right:16px;background:#101826;border:1px solid var(--line);padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(6px);transition:.25s}
   .toast.show{opacity:1;transform:translateY(0)}
+
+  /* MOBILE */
+  @media (max-width: 720px){
+    body{padding:12px}
+    header h1{font-size:20px}
+    .controls{gap:8px}
+    .row-head{display:none}
+    .row{
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "name name"
+        "sec qty"
+        "pur act"
+        "del del";
+      gap:8px;
+      padding:10px;
+    }
+    .row .name{grid-area:name}
+    .row .sec {grid-area:sec}
+    .row .qty {grid-area:qty; justify-self:end}
+    .row .pur {grid-area:pur}
+    .row .act {grid-area:act; justify-self:end}
+    .row .del {grid-area:del; justify-self:end}
+    .check{height:36px;width:56px;border-radius:18px}
+    .check::after{content:attr(data-lbl);font-size:12px;color:#fff}
+    .check:not(.on)::after{content:attr(data-off)}
+  }
 </style>
 </head>
 <body>
@@ -78,7 +124,7 @@
 <div id="gate" role="dialog" aria-modal="true">
   <div class="gate-card">
     <div class="gate-title">Enter password</div>
-    <div class="gate-sub">Beans & Co. Grocery HQ</div>
+    <div class="gate-sub">Ashbaugh–Alomary Grocery List</div>
     <div class="gate-row">
       <input id="gateInput" class="gate-input" type="password" placeholder="Password" autofocus/>
       <button id="gateBtn" class="gate-btn">Unlock</button>
@@ -89,29 +135,23 @@
 
 <div class="wrap" id="app" style="display:none">
   <header>
-    <div class="logo">🛒</div><h1>Beans & Co. Grocery HQ</h1>
-    <div id="status" class="status off"><span class="dot" style="background:#ef4444"></span><span id="statusText">Offline</span></div>
+    <div class="logo">🛒</div><h1>Ashbaugh–Alomary Grocery List</h1>
+    <div id="status" class="status off"><span class="dot" style="background:var(--bad)"></span><span id="statusText">Offline</span></div>
   </header>
 
   <div class="card" style="padding:14px">
     <div class="controls">
-      <!-- Quick Add -->
-      <input id="quick" class="input" style="flex:1" placeholder="Quick Add: e.g. milk x2 @dairy, bread @bakery, apples 4"/>
+      <input id="quick" class="input" style="flex:1" placeholder="Quick Add: milk x2 @dairy, bread @bakery, apples 4"/>
       <button id="quickBtn" class="btn">Add</button>
       <span class="chip">Tip: <span class="kbd">Enter</span> adds • <span class="kbd">Cmd/Ctrl + K</span> focuses</span>
-
-      <!-- Search -->
       <input id="search" class="input" placeholder="Search items…"/>
-      <!-- Active/Inactive tabs -->
-      <div class="tabs" style="margin-left:auto">
+      <div class="tabs">
         <div id="tabActive" class="tab active">Shopping</div>
         <div id="tabInactive" class="tab">Inactive</div>
       </div>
     </div>
 
-    <!-- Head -->
     <div class="row-head"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div></div></div>
-    <!-- Lists -->
     <div id="list"></div>
   </div>
 </div>
@@ -124,20 +164,16 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-/*** Password gate (SHA-256) ***/
-const PASSWORD_HASH = "2ada44b0bc821a012f130d7996469e147cc3efdb9470e5696883b4634ef7edb0"; // <-- set this!
+/*** Password gate (keep your existing PASSWORD_HASH) ***/
+const PASSWORD_HASH = "REPLACE_WITH_SHA256_HEX";
 async function sha256Hex(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function tryUnlock(){
-  const v=document.getElementById('gateInput').value||""; const ok=(await sha256Hex(v))===PASSWORD_HASH;
-  if(ok){ sessionStorage.setItem('grocery_authed','1'); document.getElementById('gate').classList.add('hidden'); document.getElementById('app').style.display='block'; initFirebase(); }
-  else { document.getElementById('gateErr').textContent='Incorrect password'; }
-}
+async function tryUnlock(){const v=document.getElementById('gateInput').value||"";if((await sha256Hex(v))===PASSWORD_HASH){sessionStorage.setItem('grocery_authed','1');document.getElementById('gate').classList.add('hidden');document.getElementById('app').style.display='block';initFirebase();}else{document.getElementById('gateErr').textContent='Incorrect password';}}
 document.getElementById('gateBtn').onclick=tryUnlock;
 document.getElementById('gateInput').addEventListener('keypress',e=>{ if(e.key==='Enter') tryUnlock(); });
-if(sessionStorage.getItem('grocery_authed')==='1'){ document.getElementById('gate').classList.add('hidden'); document.getElementById('app').style.display='block'; setTimeout(initFirebase,0); }
+if(sessionStorage.getItem('grocery_authed')==='1'){document.getElementById('gate').classList.add('hidden');document.getElementById('app').style.display='block';setTimeout(initFirebase,0);}
 
 /*** App state ***/
-const listId='beans-main-list';
+const listId='beans-main-list'; /* keep same DB path */
 const SECTIONS=['Bakery','Dairy','Deli','Produce','Meat','Frozen','Other'];
 let database=null, grocery={}, filter='', showActive=true;
 
@@ -161,35 +197,29 @@ function attach(){
 }
 function setOnline(on){
   const st=document.getElementById('status'); const tx=document.getElementById('statusText'); const dot=st.querySelector('.dot');
-  if(on){ st.classList.remove('off'); tx.textContent='Connected'; dot.style.background='#34d399'; }
-  else  { st.classList.add('off'); tx.textContent='Offline'; dot.style.background='#ef4444'; }
+  if(on){ st.classList.remove('off'); tx.textContent='Connected'; dot.style.background='var(--ok)'; }
+  else  { st.classList.add('off'); tx.textContent='Offline';  dot.style.background='var(--bad)'; }
 }
 
 /*** Utilities ***/
 const qs=(s,el=document)=>el.querySelector(s);
-const qsa=(s,el=document)=>[...el.querySelectorAll(s)];
 const clampInt=(v,d=1)=>{ const n=parseInt(v,10); return Number.isFinite(n)&&n>0? n:d; }
 const toast=(t='Saved')=>{ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),900); }
 
 /*** Quick Add parsing ***/
 function parseQuick(str){
-  // supports: "milk x2 @dairy", "apples 4", "bread", "milk@dairy", multiple items separated by commas
   return str.split(',').map(p=>p.trim()).filter(Boolean).map(tok=>{
     let name=tok, qty=1, sec='';
-    // section @tag
     const mSec=tok.match(/@([a-z]+)$/i); if(mSec){ sec=mSec[1]; name=tok.replace(/@([a-z]+)$/i,'').trim(); }
-    // xN or N suffix
-    const mQty= name.match(/(?:x|\*)\s*(\d+)$/i) || name.match(/(\d+)$/);
+    const mQty=name.match(/(?:x|\*)\s*(\d+)$/i) || name.match(/(\d+)$/);
     if(mQty){ qty=parseInt(mQty[1],10)||1; name=name.replace(mQty[0],'').trim(); }
-    sec = (sec ? sec : '').toLowerCase();
-    const section = SECTIONS.find(s=>s.toLowerCase()===sec) || 'Other';
+    sec = sec.toLowerCase(); const section = SECTIONS.find(s=>s.toLowerCase()===sec) || 'Other';
     return {name, quantity: qty, section};
   }).filter(it=>it.name.length>0);
 }
 
 /*** Writes ***/
 function upsertItem({name,section,quantity}){
-  // If existing same name+section → bump quantity, else push new
   const entries=Object.entries(grocery);
   const found=entries.find(([id,it])=> it && it.name && it.name.toLowerCase()===name.toLowerCase() && it.section===section);
   if(found){
@@ -209,35 +239,32 @@ function render(){
   const container=document.getElementById('list'); container.innerHTML='';
   const arr=Object.entries(grocery).map(([id,it])=>({...it,id}));
   const items=arr.filter(it=> (showActive? it.active: !it.active))
-                 .filter(it=> filter? it.name.toLowerCase().includes(filter)||it.section.toLowerCase().includes(filter):true);
+                 .filter(it=> filter? (it.name.toLowerCase().includes(filter)||it.section.toLowerCase().includes(filter)) : true);
 
-  // group by section
-  SECTIONS.forEach(sec=>{
-    const group=items.filter(it=>it.section===sec);
-    if(!group.length) return;
-    const secDiv=document.createElement('div'); secDiv.className='section';
+  const bySection = SECTIONS.map(sec => [sec, items.filter(it=>it.section===sec)]).filter(([_,g])=>g.length);
+
+  if(!bySection.length){
+    const empty=document.createElement('div'); empty.style.padding='22px'; empty.style.color='var(--muted)';
+    empty.textContent = showActive ? 'No active items.' : 'No inactive items.'; container.appendChild(empty); return;
+  }
+
+  for(const [sec, group] of bySection){
+    // section header row (acts like a separator)
     const head=document.createElement('div'); head.className='section-head';
     head.innerHTML=`<strong>${sec}</strong><span class="pill">${group.length}</span>`;
     const acts=document.createElement('div'); acts.className='section-actions';
-    const bCollapse=btn('Collapse', 'secondary', ()=>toggleBlock(itemsDiv,head,sec));
-    const bMark=btn('Mark purchased', 'secondary', ()=>bulkPurchased(sec,true));
-    const bArchive=btn(showActive?'Move all to Inactive':'Reactivate all','secondary',()=>bulkActive(sec,!showActive));
-    acts.append(bCollapse,bMark,bArchive);
+    acts.append(btn('Collapse','secondary',()=>toggleBlock(listEl,head,sec)),
+                btn('Mark purchased','secondary',()=>bulkPurchased(sec,true)),
+                btn(showActive?'Move all to Inactive':'Reactivate all','secondary',()=>bulkActive(sec,!showActive)));
     head.appendChild(acts);
+    container.appendChild(head);
 
-    const itemsDiv=document.createElement('div'); // rows holder
-    group.forEach(it=> itemsDiv.appendChild(row(it)));
-
-    secDiv.append(head,itemsDiv);
-    container.appendChild(secDiv);
-  });
-
-  if(!container.children.length){
-    const empty=document.createElement('div'); empty.style.padding='22px'; empty.style.color='var(--muted)';
-    empty.textContent = showActive ? 'No active items.' : 'No inactive items.';
-    container.appendChild(empty);
+    const listEl=document.createElement('div'); listEl.className='section';
+    group.forEach(it=> listEl.appendChild(row(it)));
+    container.appendChild(listEl);
   }
 }
+
 function btn(label,variant,fn){ const b=document.createElement('button'); b.className='btn '+(variant||''); b.textContent=label; b.onclick=fn; return b;}
 function toggleBlock(el,head,sec){
   const vis=el.style.display!=='none'; el.style.display=vis?'none':'block';
@@ -247,50 +274,51 @@ function toggleBlock(el,head,sec){
 function row(it){
   const r=document.createElement('div'); r.className='row';
 
-  // name (contenteditable)
+  // name
   const name=document.createElement('div'); name.className='name'; name.contentEditable='true'; name.textContent=it.name;
-  name.addEventListener('blur',()=>{ const v=name.textContent.trim(); if(v && v!==it.name){ database.ref(`lists/${listId}/items/${it.id}`).update({name:v}); toast(); } else { name.textContent=it.name; }});
+  name.addEventListener('blur',()=>{ const v=name.textContent.trim(); if(v && v!==it.name){ database.ref(`lists/${listId}/items/${it.id}`).update({name:v}).then(()=>toast()); } else { name.textContent=it.name; }});
+  r.appendChild(name);
 
-  // section select
-  const sec=document.createElement('div');
-  const sel=document.createElement('select'); sel.className='input'; SECTIONS.forEach(s=>{ const o=new Option(s,s,s===it.section,s===it.section); sel.add(o); });
+  // section
+  const sec=document.createElement('div'); sec.className='sec';
+  const sel=document.createElement('select'); sel.className='select';
+  SECTIONS.forEach(s=> sel.add(new Option(s,s,s===it.section,s===it.section)));
   sel.onchange=()=> database.ref(`lists/${listId}/items/${it.id}`).update({section:sel.value}).then(()=>toast());
+  sec.appendChild(sel); r.appendChild(sec);
 
-  // qty with +/- and inline input
+  // quantity
   const qty=document.createElement('div'); qty.className='qty';
-  const minus=btn('−','icon',()=> setQty(it.id,(it.quantity||1)-1));
-  const input=document.createElement('input'); input.className='input'; input.value=it.quantity||1;
-  input.onblur=()=> setQty(it.id, input.value);
-  input.onkeypress=(e)=>{ if(e.key==='Enter'){ input.blur(); } };
-  const plus=btn('+','icon',()=> setQty(it.id,(it.quantity||1)+1));
-  qty.append(minus,input,plus);
+  const minus=makeIcon('−',()=> setQty(it.id,(it.quantity||1)-1));
+  const input=document.createElement('input'); input.className='input'; input.value=it.quantity||1; input.style.width='58px'; input.onblur=()=> setQty(it.id,input.value); input.onkeypress=(e)=>{ if(e.key==='Enter'){ input.blur(); } };
+  const plus=makeIcon('+',()=> setQty(it.id,(it.quantity||1)+1));
+  qty.append(minus,input,plus); r.appendChild(qty);
 
-  // purchased check
-  const purchased=document.createElement('div'); purchased.className='check '+(it.purchased?'on':''); purchased.onclick=()=>{
-    database.ref(`lists/${listId}/items/${it.id}`).update({purchased:!it.purchased}).then(()=>toast());
-  };
+  // purchased
+  const pur=document.createElement('div'); pur.className='pur';
+  const pc=document.createElement('div'); pc.className='check '+(it.purchased?'on':''); pc.setAttribute('data-lbl','Purchased'); pc.setAttribute('data-off','Not purchased');
+  pc.onclick=()=> database.ref(`lists/${listId}/items/${it.id}`).update({purchased:!it.purchased}).then(()=>toast());
+  pur.appendChild(pc); r.appendChild(pur);
 
-  // active check
-  const active=document.createElement('div'); active.className='check '+(it.active?'on':''); active.onclick=()=>{
-    database.ref(`lists/${listId}/items/${it.id}`).update({active:!it.active}).then(()=>toast());
-  };
+  // active
+  const act=document.createElement('div'); act.className='act';
+  const ac=document.createElement('div'); ac.className='check '+(it.active?'on':''); ac.setAttribute('data-lbl','Active'); ac.setAttribute('data-off','Inactive');
+  ac.onclick=()=> database.ref(`lists/${listId}/items/${it.id}`).update({active:!it.active}).then(()=>toast());
+  act.appendChild(ac); r.appendChild(act);
 
   // delete
-  const del=document.createElement('div'); const delBtn=btn('×','icon',()=>{ if(confirm('Delete this item?')) database.ref(`lists/${listId}/items/${it.id}`).remove().then(()=>toast('Deleted')); });
-  del.append(delBtn);
+  const del=document.createElement('div'); del.className='del';
+  const delBtn=makeIcon('×',()=>{ if(confirm('Delete this item?')) database.ref(`lists/${listId}/items/${it.id}`).remove().then(()=>toast('Deleted')); });
+  del.appendChild(delBtn); r.appendChild(del);
 
-  sec.appendChild(sel); r.append(name,sec,qty,purchased,active,del);
   return r;
 }
-function setQty(id,val){
-  const q=clampInt(val,1);
-  return database.ref(`lists/${listId}/items/${id}`).update({quantity:q}).then(()=>toast());
-}
+
+function makeIcon(txt,fn){ const b=document.createElement('button'); b.className='btn icon'; b.textContent=txt; b.onclick=fn; return b; }
+function setQty(id,val){ const q=clampInt(val,1); return database.ref(`lists/${listId}/items/${id}`).update({quantity:q}).then(()=>toast()); }
 
 /*** Bulk ops ***/
 function bulkPurchased(section,val){
-  const upd={}; Object.entries(grocery).forEach(([id,it])=>{ if(it.section===section && (showActive? it.active: !it.active)) upd[id]={...it,purchased:val}; });
-  const updates={}; for(const id in upd){ updates[`lists/${listId}/items/${id}/purchased`]=val; }
+  const updates={}; Object.entries(grocery).forEach(([id,it])=>{ if(it.section===section && (showActive? it.active: !it.active)) updates[`lists/${listId}/items/${id}/purchased`]=val; });
   if(Object.keys(updates).length) database.ref().update(updates).then(()=>toast('Marked purchased'));
 }
 function bulkActive(section,flag){
@@ -310,6 +338,5 @@ document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowe
 qs('#tabActive').onclick=()=>{ showActive=true; qs('#tabActive').classList.add('active'); qs('#tabInactive').classList.remove('active'); render(); };
 qs('#tabInactive').onclick=()=>{ showActive=false; qs('#tabInactive').classList.add('active'); qs('#tabActive').classList.remove('active'); render(); };
 </script>
-
 </body>
 </html>
