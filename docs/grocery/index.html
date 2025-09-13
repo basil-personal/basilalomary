@@ -1,243 +1,598 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Grocery List</title>
-<style>
-  :root { --bg:#f9f9f9; --card:#fff; --muted:#666; --line:#e6e6e6; --brand:#0b69d0; --brand2:#0652a3; }
-  * { box-sizing: border-box }
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:var(--bg); color:#222 }
-  header { padding:24px 24px 12px }
-  h1 { margin:0 0 6px; font-size:28px }
-  .muted { color:var(--muted); font-size:14px }
-  .tabs { display:flex; gap:8px; padding:0 24px 12px }
-  .tab { padding:8px 12px; border:1px solid var(--line); border-bottom:none; background:#f3f6fb; cursor:pointer; border-radius:8px 8px 0 0 }
-  .tab.active { background:var(--card); color:#000; }
-  .card { background:var(--card); margin:0 24px 24px; border:1px solid var(--line); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05) }
-  .bar { display:flex; gap:10px; flex-wrap:wrap; padding:16px; align-items:center; border-bottom:1px solid var(--line) }
-  input[type="text"], input[type="number"], select { padding:8px; border:1px solid #ccc; border-radius:8px }
-  input[type="number"]{ width:110px }
-  button { padding:10px 14px; border:0; border-radius:10px; background:var(--brand); color:#fff; cursor:pointer; font-weight:600 }
-  button:disabled { opacity:.6; cursor:not-allowed }
-  button.secondary { background:#e9eef7; color:#0b397a }
-  table { width:100%; border-collapse:collapse }
-  th, td { border-top:1px solid var(--line); padding:12px 14px; vertical-align:middle }
-  th { background:#f6f7fb; text-align:left; font-weight:600 }
-  td input[type="text"], td input[type="number"], td select { width:100% }
-  .right { margin-left:auto }
-  .status { color:var(--muted) }
-  .pill { display:inline-block; padding:2px 8px; background:#eef3ff; border-radius:999px; font-size:12px }
-  .row-actions { display:flex; gap:8px; justify-content:flex-end }
-  .empty { padding:24px; color:var(--muted) }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #37352f;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 8px 0;
+        }
+
+        .header h1 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header .icon {
+            font-size: 36px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 8px 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #787774;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #37352f;
+            border-bottom-color: #37352f;
+        }
+
+        .tab:hover {
+            color: #37352f;
+        }
+
+        .add-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f7f6f3;
+            border-radius: 8px;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .add-form input[type="text"] {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-form select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .add-form input[type="number"] {
+            width: 80px;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #2383e2;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #0070f3;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #37352f;
+        }
+
+        .section-header:hover {
+            background: #f7f6f3;
+            border-radius: 4px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 80px 80px 60px;
+            gap: 12px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+            font-weight: 500;
+            color: #787774;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 80px 80px 60px;
+            gap: 12px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .item-row:hover {
+            background: #f7f6f3;
+        }
+
+        .item-name {
+            font-size: 14px;
+            color: #37352f;
+        }
+
+        .store-section {
+            background: #fdecc8;
+            color: #9b6c00;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .store-section.dairy {
+            background: #d3e5ff;
+            color: #0055cc;
+        }
+
+        .store-section.deli {
+            background: #ffe0e0;
+            color: #cc0000;
+        }
+
+        .store-section.produce {
+            background: #d4f4dd;
+            color: #0a6e2e;
+        }
+
+        .store-section.meat {
+            background: #ffd4d1;
+            color: #cc3300;
+        }
+
+        .store-section.frozen {
+            background: #e0f4ff;
+            color: #0077cc;
+        }
+
+        .store-section.other {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .quantity-display {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .checkbox:hover {
+            border-color: #37352f;
+            background: #f7f6f3;
+        }
+
+        .checkbox.checked {
+            background: #2383e2;
+            border-color: #2383e2;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #787774;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #f7f6f3;
+            color: #cc0000;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #787774;
+        }
+    </style>
 </head>
 <body>
-<header>
-  <h1>Grocery List</h1>
-  <div class="muted">Active shopping list with sections, Purchased & Active flags. Inactive items are archived but easily restored.</div>
-</header>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🛒</span>
+            <h1>Grocery List</h1>
+        </div>
 
-<div class="tabs">
-  <div class="tab active" data-tab="active">🛒 Shopping List</div>
-  <div class="tab" data-tab="inactive">🗂️ Inactive Items</div>
-</div>
+        <div class="tabs">
+            <div class="tab active" id="shoppingTab">
+                <span>📋</span>
+                <span>Shopping List</span>
+            </div>
+            <div class="tab" id="inactiveTab">
+                <span>📋</span>
+                <span>Inactive Items</span>
+            </div>
+        </div>
 
-<div class="card">
-  <div class="bar">
-    <input id="newItem" type="text" placeholder="New item" />
-    <select id="newSection"></select>
-    <input id="newQty" type="number" step="0.1" min="0" value="1" />
-    <label><input id="newActive" type="checkbox" checked /> Active</label>
-    <button id="addBtn">Add</button>
-    <div class="right status" id="status">Loading…</div>
-  </div>
+        <div class="add-section">
+            <div class="add-form">
+                <input type="text" id="itemNameInput" placeholder="Enter item name...">
+                <select id="sectionSelect">
+                    <option value="Bakery">Bakery</option>
+                    <option value="Dairy">Dairy</option>
+                    <option value="Deli">Deli</option>
+                    <option value="Produce">Produce</option>
+                    <option value="Meat">Meat</option>
+                    <option value="Frozen">Frozen</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="number" id="quantityInput" value="1" min="1">
+                <button class="add-btn" id="addButton">Add Item</button>
+            </div>
+        </div>
 
-  <div id="tableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:34%">Item</th>
-          <th style="width:22%">Store Section</th>
-          <th style="width:14%">Quantity</th>
-          <th style="width:14%">Purchased</th>
-          <th style="width:16%">Active</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="5" class="empty">Loading…</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div id="shoppingList">
+            <div class="table-header">
+                <div>Item</div>
+                <div>Section</div>
+                <div>Quantity</div>
+                <div>Purchased</div>
+                <div>Active</div>
+                <div>Delete</div>
+            </div>
+            <div id="activeItems"></div>
+        </div>
 
-<script>
-  // ===== Config =====
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzEDHwuTsRTgPlitfqd-eYkyMW6EcvhNDaVykx48ZdpXeoemK5HOz6f63zmXEnmjGJFRw/exec";
-  const SECTIONS = ["Bakery","Dairy","Deli","Produce","Pantry","Frozen","Beverages","Misc"];
+        <div id="inactiveList" style="display: none;">
+            <div class="table-header">
+                <div>Item</div>
+                <div>Section</div>
+                <div>Quantity</div>
+                <div>Purchased</div>
+                <div>Active</div>
+                <div>Delete</div>
+            </div>
+            <div id="inactiveItems"></div>
+        </div>
+    </div>
 
-  // ===== EL helpers =====
-  const $ = (id) => document.getElementById(id);
-  const qsa = (sel, el=document) => [...el.querySelectorAll(sel)];
-  function sectionSelect(value) {
-    const sel = document.createElement("select");
-    SECTIONS.forEach(s => { const opt=document.createElement("option"); opt.value=s; opt.textContent=s; sel.appendChild(opt); });
-    sel.value = value || SECTIONS[0];
-    return sel;
-  }
-  function boolBox(checked) { const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!checked; return cb; }
-  function textInput(v){ const i=document.createElement("input"); i.type="text"; i.value=v||""; return i; }
-  function numInput(v){ const i=document.createElement("input"); i.type="number"; i.step="0.1"; i.min="0"; i.value=v||"1"; return i; }
-  const toTF = b => b ? "TRUE" : "FALSE";
+    <script>
+        // Initialize data
+        let groceryItems = [];
+        let listId = '';
+        let currentTab = 'shopping';
 
-  // ===== Small helper for x-www-form-urlencoded =====
-  function formEncode(obj) {
-    return Object.entries(obj).map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&");
-  }
+        // Get or create list ID
+        function initializeList() {
+            const urlParams = new URLSearchParams(window.location.search);
+            listId = urlParams.get('list');
+            
+            if (!listId) {
+                listId = 'list_' + Date.now();
+                window.history.replaceState({}, '', `?list=${listId}`);
+            }
+            
+            loadItems();
+        }
 
-  // ===== API (form-encoded to avoid preflight/CORS) =====
-  async function apiList() {
-    const url = `${GAS_URL}?action=list&_=${Date.now()}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to load");
-    return res.json();
-  }
-  async function apiUpdate(rowIndex, values) {
-    const body = formEncode({
-      action: "update",
-      rowIndex: String(rowIndex),
-      values: JSON.stringify(values)
-    });
-    const res = await fetch(GAS_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
-      body
-    });
-    if (!res.ok) throw new Error("Update failed");
-    return res.json();
-  }
-  async function apiAppend(values) {
-    const body = formEncode({
-      action: "append",
-      values: JSON.stringify(values)
-    });
-    const res = await fetch(GAS_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
-      body
-    });
-    if (!res.ok) throw new Error("Append failed");
-    return res.json();
-  }
+        // Load items from localStorage
+        function loadItems() {
+            const saved = localStorage.getItem(listId);
+            if (saved) {
+                try {
+                    groceryItems = JSON.parse(saved);
+                } catch (e) {
+                    groceryItems = [];
+                }
+            }
+            renderItems();
+        }
 
-  // ===== State =====
-  let allRows = [];
-  let activeTab = "active";
+        // Save items to localStorage
+        function saveItems() {
+            localStorage.setItem(listId, JSON.stringify(groceryItems));
+        }
 
-  // ===== Rendering =====
-  function setStatus(t){ $("status").textContent = t; }
+        // Add new item
+        function addItem() {
+            const nameInput = document.getElementById('itemNameInput');
+            const sectionSelect = document.getElementById('sectionSelect');
+            const quantityInput = document.getElementById('quantityInput');
+            
+            const name = nameInput.value.trim();
+            if (!name) return;
+            
+            // Check if item exists in same section
+            const existingItem = groceryItems.find(item => 
+                item.name.toLowerCase() === name.toLowerCase() && 
+                item.section === sectionSelect.value
+            );
+            
+            if (existingItem) {
+                // Aggregate quantity
+                existingItem.quantity += parseInt(quantityInput.value);
+                existingItem.active = true; // Make it active
+            } else {
+                // Add new item
+                const newItem = {
+                    id: 'item_' + Date.now(),
+                    name: name,
+                    section: sectionSelect.value,
+                    quantity: parseInt(quantityInput.value),
+                    purchased: false,
+                    active: true
+                };
+                groceryItems.push(newItem);
+            }
+            
+            // Clear inputs
+            nameInput.value = '';
+            quantityInput.value = '1';
+            
+            saveItems();
+            renderItems();
+        }
 
-  function render() {
-    const tbody = $("tbody");
-    tbody.innerHTML = "";
-    if (!allRows || allRows.length <= 1) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty">No data yet</td></tr>`;
-      return;
-    }
-    for (let i=1; i<allRows.length; i++) {
-      const row = allRows[i];
-      const isActive = (row[4] === "TRUE");
-      if (activeTab === "active" && !isActive) continue;
-      if (activeTab === "inactive" && isActive) continue;
+        // Render all items
+        function renderItems() {
+            const activeContainer = document.getElementById('activeItems');
+            const inactiveContainer = document.getElementById('inactiveItems');
+            
+            // Clear containers
+            activeContainer.innerHTML = '';
+            inactiveContainer.innerHTML = '';
+            
+            // Separate active and inactive
+            const activeItems = groceryItems.filter(item => item.active);
+            const inactiveItems = groceryItems.filter(item => !item.active);
+            
+            // Group by section
+            const sections = ['Bakery', 'Dairy', 'Deli', 'Produce', 'Meat', 'Frozen', 'Other'];
+            
+            // Render active items
+            if (activeItems.length === 0) {
+                activeContainer.innerHTML = '<div class="empty-state">No active items</div>';
+            } else {
+                sections.forEach(section => {
+                    const sectionItems = activeItems.filter(item => item.section === section);
+                    if (sectionItems.length > 0) {
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.className = 'section';
+                        
+                        const headerDiv = document.createElement('div');
+                        headerDiv.className = 'section-header';
+                        headerDiv.innerHTML = `▼ ${section}`;
+                        sectionDiv.appendChild(headerDiv);
+                        
+                        const itemsDiv = document.createElement('div');
+                        sectionItems.forEach(item => {
+                            itemsDiv.appendChild(createItemRow(item));
+                        });
+                        sectionDiv.appendChild(itemsDiv);
+                        
+                        activeContainer.appendChild(sectionDiv);
+                    }
+                });
+            }
+            
+            // Render inactive items
+            if (inactiveItems.length === 0) {
+                inactiveContainer.innerHTML = '<div class="empty-state">No inactive items</div>';
+            } else {
+                sections.forEach(section => {
+                    const sectionItems = inactiveItems.filter(item => item.section === section);
+                    if (sectionItems.length > 0) {
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.className = 'section';
+                        
+                        const headerDiv = document.createElement('div');
+                        headerDiv.className = 'section-header';
+                        headerDiv.innerHTML = `▼ ${section}`;
+                        sectionDiv.appendChild(headerDiv);
+                        
+                        const itemsDiv = document.createElement('div');
+                        sectionItems.forEach(item => {
+                            itemsDiv.appendChild(createItemRow(item));
+                        });
+                        sectionDiv.appendChild(itemsDiv);
+                        
+                        inactiveContainer.appendChild(sectionDiv);
+                    }
+                });
+            }
+        }
 
-      const [item, section, qty, purchased, active] = [
-        row[0] || "", row[1] || SECTIONS[0], row[2] || "1",
-        row[3] === "TRUE", row[4] === "TRUE"
-      ];
-      const rowIndex = i + 1;
+        // Create item row element
+        function createItemRow(item) {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            
+            const sectionClass = item.section.toLowerCase().replace(/\s+/g, '-');
+            
+            row.innerHTML = `
+                <div class="item-name">${item.name}</div>
+                <span class="store-section ${sectionClass}">${item.section}</span>
+                <div class="quantity-display">${item.quantity}</div>
+                <div class="checkbox ${item.purchased ? 'checked' : ''}" data-id="${item.id}" data-type="purchased"></div>
+                <div class="checkbox ${item.active ? 'checked' : ''}" data-id="${item.id}" data-type="active"></div>
+                <button class="delete-btn" data-id="${item.id}">×</button>
+            `;
+            
+            // Add event listeners to checkboxes
+            row.querySelectorAll('.checkbox').forEach(checkbox => {
+                checkbox.addEventListener('click', handleCheckbox);
+            });
+            
+            // Add event listener to delete button
+            row.querySelector('.delete-btn').addEventListener('click', handleDelete);
+            
+            return row;
+        }
 
-      const tr = document.createElement("tr");
-      const tdItem = document.createElement("td"); const inItem = textInput(item); tdItem.appendChild(inItem);
-      const tdSec  = document.createElement("td"); const inSec  = sectionSelect(section); tdSec.appendChild(inSec);
-      const tdQty  = document.createElement("td"); const inQty  = numInput(qty); tdQty.appendChild(inQty);
-      const tdPur  = document.createElement("td"); const inPur  = boolBox(purchased); tdPur.appendChild(inPur);
-      const tdAct  = document.createElement("td"); const inAct  = boolBox(active); tdAct.appendChild(inAct);
-      tr.append(tdItem, tdSec, tdQty, tdPur, tdAct);
-      tbody.appendChild(tr);
+        // Handle checkbox clicks
+        function handleCheckbox(e) {
+            const id = e.target.dataset.id;
+            const type = e.target.dataset.type;
+            const item = groceryItems.find(i => i.id === id);
+            
+            if (item) {
+                if (type === 'purchased') {
+                    item.purchased = !item.purchased;
+                } else if (type === 'active') {
+                    item.active = !item.active;
+                }
+                saveItems();
+                renderItems();
+            }
+        }
 
-      [inItem, inSec, inQty, inPur, inAct].forEach(ctrl => {
-        ctrl.addEventListener("change", async () => {
-          try {
-            setStatus("Saving…");
-            await apiUpdate(rowIndex, [
-              inItem.value.trim(), inSec.value, inQty.value,
-              toTF(inPur.checked), toTF(inAct.checked)
-            ]);
-            allRows[rowIndex-1] = [
-              inItem.value.trim(), inSec.value, inQty.value,
-              toTF(inPur.checked), toTF(inAct.checked)
-            ];
-            render(); // if Active toggled, row will move between tabs
-            setStatus("Saved");
-          } catch (e) { console.error(e); setStatus("Save failed"); }
+        // Handle delete
+        function handleDelete(e) {
+            const id = e.target.dataset.id;
+            groceryItems = groceryItems.filter(item => item.id !== id);
+            saveItems();
+            renderItems();
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            const shoppingTab = document.getElementById('shoppingTab');
+            const inactiveTab = document.getElementById('inactiveTab');
+            const shoppingList = document.getElementById('shoppingList');
+            const inactiveList = document.getElementById('inactiveList');
+            
+            if (tab === 'shopping') {
+                shoppingTab.classList.add('active');
+                inactiveTab.classList.remove('active');
+                shoppingList.style.display = 'block';
+                inactiveList.style.display = 'none';
+            } else {
+                shoppingTab.classList.remove('active');
+                inactiveTab.classList.add('active');
+                shoppingList.style.display = 'none';
+                inactiveList.style.display = 'block';
+            }
+        }
+
+        // Set up event listeners
+        document.getElementById('addButton').addEventListener('click', addItem);
+        
+        document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addItem();
+            }
         });
-      });
-    }
-    if (!tbody.children.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty">${
-        activeTab === "active" ? "No active items" : "No inactive items"
-      }</td></tr>`;
-    }
-  }
+        
+        document.getElementById('shoppingTab').addEventListener('click', () => {
+            switchTab('shopping');
+        });
+        
+        document.getElementById('inactiveTab').addEventListener('click', () => {
+            switchTab('inactive');
+        });
 
-  async function load() {
-    setStatus("Loading…");
-    try {
-      const data = await apiList();
-      allRows = data.values || [];
-      render();
-      setStatus("Loaded");
-    } catch(e) {
-      console.error(e);
-      setStatus("Load failed");
-      $("tbody").innerHTML = `<tr><td colspan="5" class="empty" style="color:#c00">Error loading data</td></tr>`;
-    }
-  }
+        // Auto-sync
+        setInterval(() => {
+            const saved = localStorage.getItem(listId);
+            if (saved) {
+                try {
+                    const newItems = JSON.parse(saved);
+                    if (JSON.stringify(newItems) !== JSON.stringify(groceryItems)) {
+                        groceryItems = newItems;
+                        renderItems();
+                    }
+                } catch (e) {}
+            }
+        }, 2000);
 
-  // ===== Add new item =====
-  function populateNewSection() {
-    const sel = $("newSection");
-    SECTIONS.forEach(s => { const o=document.createElement("option"); o.value=s; o.textContent=s; sel.appendChild(o); });
-  }
-  async function addNew() {
-    const name = $("newItem").value.trim();
-    const sec = $("newSection").value;
-    const qty = $("newQty").value;
-    const act = $("newActive").checked;
-    if (!name) return alert("Enter an item name");
-    try {
-      setStatus("Adding…");
-      await apiAppend([name, sec, qty, "FALSE", toTF(act)]);
-      $("newItem").value = ""; $("newQty").value = "1"; $("newActive").checked = true;
-      await load();
-      setStatus("Added");
-    } catch (e) { console.error(e); setStatus("Add failed"); }
-  }
-
-  // ===== Tabs =====
-  function setTab(tab) {
-    activeTab = tab;
-    qsa(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
-    render();
-  }
-
-  // Boot
-  document.addEventListener("DOMContentLoaded", () => {
-    populateNewSection();
-    $("addBtn").addEventListener("click", addNew);
-    qsa(".tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
-    load();
-  });
-</script>
+        // Initialize on load
+        initializeList();
+    </script>
 </body>
 </html>
