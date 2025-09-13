@@ -1,709 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery List - Shared</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: #ffffff;
-            color: #37352f;
-            line-height: 1.5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding: 8px 0;
-        }
-
-        .header h1 {
-            font-size: 40px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .header .icon {
-            font-size: 36px;
-        }
-
-        .sync-status {
-            margin-left: auto;
-            padding: 6px 12px;
-            background: #d4f4dd;
-            color: #0a6e2e;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .sync-status.offline {
-            background: #ffe0e0;
-            color: #cc0000;
-        }
-
-        .sync-status .dot {
-            width: 8px;
-            height: 8px;
-            background: #0a6e2e;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .sync-status.offline .dot {
-            background: #cc0000;
-            animation: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 24px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 0;
-        }
-
-        .tab {
-            padding: 8px 4px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #787774;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            color: #37352f;
-            border-bottom-color: #37352f;
-        }
-
-        .tab:hover {
-            color: #37352f;
-        }
-
-        .add-section {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f7f6f3;
-            border-radius: 8px;
-        }
-
-        .add-form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .add-form input[type="text"] {
-            flex: 1;
-            min-width: 200px;
-            padding: 8px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .add-form select {
-            padding: 8px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
-        }
-
-        .add-form input[type="number"] {
-            width: 80px;
-            padding: 8px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .add-btn {
-            background: #2383e2;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .add-btn:hover {
-            background: #0070f3;
-        }
-
-        .section {
-            margin-bottom: 24px;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 0;
-            cursor: pointer;
-            user-select: none;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #37352f;
-        }
-
-        .section-header:hover {
-            background: #f7f6f3;
-            border-radius: 4px;
-        }
-
-        .table-header {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 80px 80px 60px;
-            gap: 12px;
-            padding: 8px 12px;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 12px;
-            font-weight: 500;
-            color: #787774;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .item-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 80px 80px 60px;
-            gap: 12px;
-            padding: 8px 12px;
-            border-bottom: 1px solid #f0f0f0;
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .item-row:hover {
-            background: #f7f6f3;
-        }
-
-        .item-name {
-            font-size: 14px;
-            color: #37352f;
-        }
-
-        .store-section {
-            background: #fdecc8;
-            color: #9b6c00;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .store-section.dairy {
-            background: #d3e5ff;
-            color: #0055cc;
-        }
-
-        .store-section.deli {
-            background: #ffe0e0;
-            color: #cc0000;
-        }
-
-        .store-section.produce {
-            background: #d4f4dd;
-            color: #0a6e2e;
-        }
-
-        .store-section.meat {
-            background: #ffd4d1;
-            color: #cc3300;
-        }
-
-        .store-section.frozen {
-            background: #e0f4ff;
-            color: #0077cc;
-        }
-
-        .store-section.other {
-            background: #f0f0f0;
-            color: #555;
-        }
-
-        .quantity-display {
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .checkbox {
-            width: 18px;
-            height: 18px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 3px;
-            cursor: pointer;
-            display: inline-block;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .checkbox:hover {
-            border-color: #37352f;
-            background: #f7f6f3;
-        }
-
-        .checkbox.checked {
-            background: #2383e2;
-            border-color: #2383e2;
-        }
-
-        .checkbox.checked::after {
-            content: '✓';
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .delete-btn {
-            background: transparent;
-            border: none;
-            color: #787774;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .delete-btn:hover {
-            background: #f7f6f3;
-            color: #cc0000;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #787774;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #787774;
-        }
-
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Beans & Co. Grocery HQ</title>
+<style>
+  /* ——— your original styles, unchanged except tiny comments ——— */
+  * { margin:0; padding:0; box-sizing:border-box }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif; background:#fff; color:#37352f; line-height:1.5; padding:20px }
+  #welcomeScreen { position:fixed; inset:0; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); display:flex; align-items:center; justify-content:center; z-index:1000; transition:opacity .8s ease-out, transform .8s ease-out }
+  #welcomeScreen.hidden { display:none }
+  .welcome-content { text-align:center; color:#fff; padding:40px; animation:float 3s ease-in-out infinite }
+  .bean-emoji { font-size:80px; margin-bottom:20px; animation:bounce 1s ease-out }
+  .welcome-title { font-size:48px; font-weight:700; margin-bottom:16px; text-shadow:2px 2px 4px rgba(0,0,0,.1) }
+  .welcome-message { font-size:20px; opacity:.95; margin-bottom:30px; max-width:400px }
+  .food-emojis { display:flex; gap:20px; justify-content:center; font-size:30px; margin-bottom:30px }
+  .food-emojis span:nth-child(1){animation:wiggle 2s ease-in-out infinite}
+  .food-emojis span:nth-child(2){animation:wiggle 2s ease-in-out infinite .2s}
+  .food-emojis span:nth-child(3){animation:wiggle 2s ease-in-out infinite .4s}
+  .food-emojis span:nth-child(4){animation:wiggle 2s ease-in-out infinite .6s}
+  .food-emojis span:nth-child(5){animation:wiggle 2s ease-in-out infinite .8s}
+  .welcome-button{background:#fff;color:#764ba2;border:0;padding:14px 32px;border-radius:30px;font-size:18px;font-weight:600;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(0,0,0,.2)}
+  .welcome-button:hover{transform:scale(1.05)}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+  @keyframes bounce{0%{transform:scale(0) rotate(0)}50%{transform:scale(1.1) rotate(180deg)}100%{transform:scale(1) rotate(360deg)}}
+  @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+  .container{max-width:900px;margin:0 auto;background:#fff}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding:8px 0}
+  .header h1{font-size:40px;font-weight:700;letter-spacing:-.02em}
+  .header .icon{font-size:36px}
+  .sync-status{margin-left:auto;padding:6px 12px;background:#d4f4dd;color:#0a6e2e;border-radius:20px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
+  .sync-status.offline{background:#ffe0e0;color:#c00}
+  .sync-status .dot{width:8px;height:8px;background:#0a6e2e;border-radius:50%;animation:pulse 2s infinite}
+  .sync-status.offline .dot{background:#c00;animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .tabs{display:flex;gap:24px;margin-bottom:24px;border-bottom:1px solid #e0e0e0;padding-bottom:0}
+  .tab{padding:8px 4px;font-size:14px;font-weight:500;color:#787774;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;transition:all .2s}
+  .tab.active{color:#37352f;border-bottom-color:#37352f}
+  .tab:hover{color:#37352f}
+  .add-section{margin-bottom:20px;padding:20px;background:#f7f6f3;border-radius:8px}
+  .add-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .add-form input[type="text"]{flex:1;min-width:200px;padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px}
+  .add-form select{padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px;background:#fff}
+  .add-form input[type="number"]{width:80px;padding:8px 12px;border:1px solid #e0e0e0;border-radius:4px;font-size:14px}
+  .add-btn{background:#2383e2;color:#fff;border:0;padding:8px 20px;border-radius:4px;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s}
+  .add-btn:hover{background:#0070f3}
+  .section{margin-bottom:24px}
+  .section-header{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;user-select:none;margin-bottom:8px;font-size:14px;font-weight:600;color:#37352f}
+  .section-header:hover{background:#f7f6f3;border-radius:4px}
+  .table-header{display:grid;grid-template-columns:2fr 1fr 1fr 80px 80px 60px;gap:12px;padding:8px 12px;border-bottom:1px solid #e0e0e0;font-size:12px;font-weight:500;color:#787774;text-transform:uppercase;letter-spacing:.03em}
+  .item-row{display:grid;grid-template-columns:2fr 1fr 1fr 80px 80px 60px;gap:12px;padding:8px 12px;border-bottom:1px solid #f0f0f0;align-items:center;transition:background .2s}
+  .item-row:hover{background:#f7f6f3}
+  .item-name{font-size:14px;color:#37352f}
+  .store-section{background:#fdecc8;color:#9b6c00;padding:2px 8px;border-radius:4px;font-size:14px;display:inline-block;text-align:center}
+  .store-section.dairy{background:#d3e5ff;color:#0055cc}
+  .store-section.deli{background:#ffe0e0;color:#c00}
+  .store-section.produce{background:#d4f4dd;color:#0a6e2e}
+  .store-section.meat{background:#ffd4d1;color:#c30}
+  .store-section.frozen{background:#e0f4ff;color:#07c}
+  .store-section.other{background:#f0f0f0;color:#555}
+  .quantity-display{text-align:center;font-size:14px}
+  .checkbox{width:18px;height:18px;border:1.5px solid #e0e0e0;border-radius:3px;cursor:pointer;display:inline-block;position:relative;transition:all .2s}
+  .checkbox:hover{border-color:#37352f;background:#f7f6f3}
+  .checkbox.checked{background:#2383e2;border-color:#2383e2}
+  .checkbox.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:bold;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+  .delete-btn{background:transparent;border:0;color:#787774;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;transition:all .2s}
+  .delete-btn:hover{background:#f7f6f3;color:#c00}
+  .empty-state{text-align:center;padding:40px;color:#787774}
+  .loading{text-align:center;padding:40px;color:#787774}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <span class="icon">🛒</span>
-            <h1>Grocery List</h1>
-            <div class="sync-status" id="syncStatus">
-                <span class="dot"></span>
-                <span>Connected</span>
-            </div>
-        </div>
+  <!-- Welcome Screen -->
+  <div id="welcomeScreen">
+    <div class="welcome-content">
+      <div class="bean-emoji">🫘</div>
+      <h1 class="welcome-title">Hi Beans!</h1>
+      <p class="welcome-message">Welcome to our magical grocery list where snacks appear and vegetables mysteriously disappear! 🪄</p>
+      <div class="food-emojis"><span>🥑</span><span>🥖</span><span>🧀</span><span>🍓</span><span>🥛</span></div>
+      <button class="welcome-button" onclick="hideWelcome()">Let's Shop! 🛒</button>
+    </div>
+  </div>
 
-        <div class="tabs">
-            <div class="tab active" id="shoppingTab">
-                <span>📋</span>
-                <span>Shopping List</span>
-            </div>
-            <div class="tab" id="inactiveTab">
-                <span>📋</span>
-                <span>Inactive Items</span>
-            </div>
-        </div>
-
-        <div class="add-section">
-            <div class="add-form">
-                <input type="text" id="itemNameInput" placeholder="Enter item name...">
-                <select id="sectionSelect">
-                    <option value="Bakery">Bakery</option>
-                    <option value="Dairy">Dairy</option>
-                    <option value="Deli">Deli</option>
-                    <option value="Produce">Produce</option>
-                    <option value="Meat">Meat</option>
-                    <option value="Frozen">Frozen</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="number" id="quantityInput" value="1" min="1">
-                <button class="add-btn" id="addButton">Add Item</button>
-            </div>
-        </div>
-
-        <div id="shoppingList">
-            <div class="table-header">
-                <div>Item</div>
-                <div>Section</div>
-                <div>Quantity</div>
-                <div>Purchased</div>
-                <div>Active</div>
-                <div>Delete</div>
-            </div>
-            <div id="activeItems" class="loading">Loading items</div>
-        </div>
-
-        <div id="inactiveList" style="display: none;">
-            <div class="table-header">
-                <div>Item</div>
-                <div>Section</div>
-                <div>Quantity</div>
-                <div>Purchased</div>
-                <div>Active</div>
-                <div>Delete</div>
-            </div>
-            <div id="inactiveItems"></div>
-        </div>
+  <!-- Main App -->
+  <div class="container">
+    <div class="header">
+      <span class="icon">🛒</span><h1>Beans & Co. Grocery HQ</h1>
+      <div class="sync-status" id="syncStatus"><span class="dot"></span><span id="statusText">Connecting...</span></div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { 
-            getDatabase, 
-            ref, 
-            set, 
-            onValue, 
-            push, 
-            remove,
-            onDisconnect,
-            serverTimestamp
-        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    <div class="tabs">
+      <div class="tab active" id="shoppingTab" onclick="switchTab('shopping')"><span>📋</span><span>Shopping List</span></div>
+      <div class="tab" id="inactiveTab" onclick="switchTab('inactive')"><span>📋</span><span>Inactive Items</span></div>
+    </div>
 
-        // Your Firebase configuration
+    <div class="add-section">
+      <div class="add-form">
+        <input type="text" id="itemNameInput" placeholder="What do we need, Beans?"/>
+        <select id="sectionSelect">
+          <option value="Bakery">Bakery</option><option value="Dairy">Dairy</option><option value="Deli">Deli</option>
+          <option value="Produce">Produce</option><option value="Meat">Meat</option><option value="Frozen">Frozen</option><option value="Other">Other</option>
+        </select>
+        <input type="number" id="quantityInput" value="1" min="1"/>
+        <button class="add-btn" id="addBtn">Add Item</button>
+      </div>
+    </div>
+
+    <div id="shoppingList">
+      <div class="table-header"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div>Delete</div></div>
+      <div id="activeItems" class="loading">Connecting…</div>
+    </div>
+    <div id="inactiveList" style="display:none">
+      <div class="table-header"><div>Item</div><div>Section</div><div>Quantity</div><div>Purchased</div><div>Active</div><div>Delete</div></div>
+      <div id="inactiveItems"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    // ——— state ———
+    let groceryItems = {};
+    let currentTab = 'shopping';
+    const listId = 'beans-main-list';
+    let database = null;
+    let isConnected = false;
+
+    // ——— init auth + db ———
+    function initFirebase() {
+      try {
         const firebaseConfig = {
-            apiKey: "AIzaSyCQpMDkuFNc1jWH1I_WQZ8Ev2UA2HgEGCI",
-            authDomain: "grocery-list-44616.firebaseapp.com",
-            databaseURL: "https://grocery-list-44616-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "grocery-list-44616",
-            storageBucket: "grocery-list-44616.firebasestorage.app",
-            messagingSenderId: "27061694844",
-            appId: "1:27061694844:web:44c2d6068de8e5160df4f9",
-            measurementId: "G-TGXQ3XET47"
+          apiKey: "AIzaSyCQpMDkuFNc1jWH1I_WQZ8Ev2UA2HgEGCI",
+          authDomain: "grocery-list-44616.firebaseapp.com",
+          databaseURL: "https://grocery-list-44616-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "grocery-list-44616"
         };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // Global variables
-        let groceryItems = {};
-        let listId = '';
-        let currentTab = 'shopping';
-        let listRef = null;
-
-        // Initialize
-        function initializeList() {
-            const urlParams = new URLSearchParams(window.location.search);
-            listId = urlParams.get('list');
-            
-            if (!listId) {
-                // Create new list
-                listId = generateListId();
-                window.history.replaceState({}, '', `?list=${listId}`);
-            }
-            
-            // Update share URL
-            const shareUrl = window.location.href;
-            document.getElementById('shareUrl').value = shareUrl;
-            
-            // Set up Firebase reference
-            listRef = ref(database, `lists/${listId}/items`);
-            
-            // Listen for changes
-            onValue(listRef, (snapshot) => {
-                const data = snapshot.val();
-                groceryItems = data || {};
-                renderItems();
-                
-                // Update sync status
-                updateSyncStatus(true);
-            }, (error) => {
-                console.error('Firebase error:', error);
-                updateSyncStatus(false);
-            });
-            
-            // Monitor connection
-            const connectedRef = ref(database, '.info/connected');
-            onValue(connectedRef, (snapshot) => {
-                updateSyncStatus(snapshot.val() === true);
-            });
-        }
-
-        // Generate random list ID
-        function generateListId() {
-            return Math.random().toString(36).substring(2, 15);
-        }
-
-        // Update sync status indicator
-        function updateSyncStatus(connected) {
-            const statusEl = document.getElementById('syncStatus');
-            if (connected) {
-                statusEl.className = 'sync-status';
-                statusEl.innerHTML = '<span class="dot"></span><span>Connected</span>';
-            } else {
-                statusEl.className = 'sync-status offline';
-                statusEl.innerHTML = '<span class="dot"></span><span>Offline</span>';
-            }
-        }
-
-        // Add new item
-        window.addItem = function() {
-            const nameInput = document.getElementById('itemNameInput');
-            const sectionSelect = document.getElementById('sectionSelect');
-            const quantityInput = document.getElementById('quantityInput');
-            
-            const name = nameInput.value.trim();
-            if (!name) return;
-            
-            // Check if item exists in same section
-            let foundExisting = false;
-            for (let id in groceryItems) {
-                const item = groceryItems[id];
-                if (item.name.toLowerCase() === name.toLowerCase() && 
-                    item.section === sectionSelect.value) {
-                    // Update existing item
-                    const updates = {
-                        ...item,
-                        quantity: item.quantity + parseInt(quantityInput.value),
-                        active: true,
-                        lastUpdated: Date.now()
-                    };
-                    set(ref(database, `lists/${listId}/items/${id}`), updates);
-                    foundExisting = true;
-                    break;
-                }
-            }
-            
-            if (!foundExisting) {
-                // Add new item
-                const newItemRef = push(listRef);
-                set(newItemRef, {
-                    name: name,
-                    section: sectionSelect.value,
-                    quantity: parseInt(quantityInput.value),
-                    purchased: false,
-                    active: true,
-                    createdAt: Date.now(),
-                    lastUpdated: Date.now()
-                });
-            }
-            
-            // Clear inputs
-            nameInput.value = '';
-            quantityInput.value = '1';
-            nameInput.focus();
-        }
-
-        // Render items
-        function renderItems() {
-            const activeContainer = document.getElementById('activeItems');
-            const inactiveContainer = document.getElementById('inactiveItems');
-            
-            // Convert object to array and separate
-            const itemsArray = Object.entries(groceryItems).map(([id, item]) => ({
-                ...item,
-                id: id
-            }));
-            
-            const activeItems = itemsArray.filter(item => item.active);
-            const inactiveItems = itemsArray.filter(item => !item.active);
-            
-            // Clear containers
-            activeContainer.innerHTML = '';
-            activeContainer.className = '';
-            inactiveContainer.innerHTML = '';
-            
-            // Group by section
-            const sections = ['Bakery', 'Dairy', 'Deli', 'Produce', 'Meat', 'Frozen', 'Other'];
-            
-            // Render active items
-            if (activeItems.length === 0) {
-                activeContainer.innerHTML = '<div class="empty-state">No active items. Add your first item above!</div>';
-            } else {
-                sections.forEach(section => {
-                    const sectionItems = activeItems.filter(item => item.section === section);
-                    if (sectionItems.length > 0) {
-                        const sectionDiv = document.createElement('div');
-                        sectionDiv.className = 'section';
-                        
-                        const headerDiv = document.createElement('div');
-                        headerDiv.className = 'section-header';
-                        headerDiv.innerHTML = `▼ ${section}`;
-                        sectionDiv.appendChild(headerDiv);
-                        
-                        const itemsDiv = document.createElement('div');
-                        sectionItems.forEach(item => {
-                            itemsDiv.appendChild(createItemRow(item));
-                        });
-                        sectionDiv.appendChild(itemsDiv);
-                        
-                        activeContainer.appendChild(sectionDiv);
-                    }
-                });
-            }
-            
-            // Render inactive items
-            if (inactiveItems.length === 0) {
-                inactiveContainer.innerHTML = '<div class="empty-state">No inactive items</div>';
-            } else {
-                sections.forEach(section => {
-                    const sectionItems = inactiveItems.filter(item => item.section === section);
-                    if (sectionItems.length > 0) {
-                        const sectionDiv = document.createElement('div');
-                        sectionDiv.className = 'section';
-                        
-                        const headerDiv = document.createElement('div');
-                        headerDiv.className = 'section-header';
-                        headerDiv.innerHTML = `▼ ${section}`;
-                        sectionDiv.appendChild(headerDiv);
-                        
-                        const itemsDiv = document.createElement('div');
-                        sectionItems.forEach(item => {
-                            itemsDiv.appendChild(createItemRow(item));
-                        });
-                        sectionDiv.appendChild(itemsDiv);
-                        
-                        inactiveContainer.appendChild(sectionDiv);
-                    }
-                });
-            }
-        }
-
-        // Create item row
-        function createItemRow(item) {
-            const row = document.createElement('div');
-            row.className = 'item-row';
-            
-            const sectionClass = item.section.toLowerCase().replace(/\s+/g, '-');
-            
-            row.innerHTML = `
-                <div class="item-name">${item.name}</div>
-                <span class="store-section ${sectionClass}">${item.section}</span>
-                <div class="quantity-display">${item.quantity}</div>
-                <div class="checkbox ${item.purchased ? 'checked' : ''}" data-id="${item.id}" data-type="purchased"></div>
-                <div class="checkbox ${item.active ? 'checked' : ''}" data-id="${item.id}" data-type="active"></div>
-                <button class="delete-btn" data-id="${item.id}">×</button>
-            `;
-            
-            // Add event listeners
-            row.querySelectorAll('.checkbox').forEach(checkbox => {
-                checkbox.addEventListener('click', handleCheckbox);
-            });
-            
-            row.querySelector('.delete-btn').addEventListener('click', handleDelete);
-            
-            return row;
-        }
-
-        // Handle checkbox
-        function handleCheckbox(e) {
-            const id = e.target.dataset.id;
-            const type = e.target.dataset.type;
-            const item = groceryItems[id];
-            
-            if (item) {
-                const updates = {
-                    ...item,
-                    [type]: !item[type],
-                    lastUpdated: Date.now()
-                };
-                set(ref(database, `lists/${listId}/items/${id}`), updates);
-            }
-        }
-
-        // Handle delete
-        function handleDelete(e) {
-            const id = e.target.dataset.id;
-            remove(ref(database, `lists/${listId}/items/${id}`));
-        }
-
-        // Switch tabs
-        window.switchTab = function(tab) {
-            currentTab = tab;
-            const shoppingTab = document.getElementById('shoppingTab');
-            const inactiveTab = document.getElementById('inactiveTab');
-            const shoppingList = document.getElementById('shoppingList');
-            const inactiveList = document.getElementById('inactiveList');
-            
-            if (tab === 'shopping') {
-                shoppingTab.classList.add('active');
-                inactiveTab.classList.remove('active');
-                shoppingList.style.display = 'block';
-                inactiveList.style.display = 'none';
-            } else {
-                shoppingTab.classList.remove('active');
-                inactiveTab.classList.add('active');
-                shoppingList.style.display = 'none';
-                inactiveList.style.display = 'block';
-            }
-        }
-
-        // Copy share URL - removed since we don't need it anymore
-        
-        // Set up event listeners
-        document.getElementById('addButton').addEventListener('click', () => window.addItem());
-        
-        document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                window.addItem();
-            }
-        });
-        
-        document.getElementById('shoppingTab').addEventListener('click', () => {
-            window.switchTab('shopping');
-        });
-        
-        document.getElementById('inactiveTab').addEventListener('click', () => {
-            window.switchTab('inactive');
+        // Sign in anonymously then attach DB listeners
+        firebase.auth().onAuthStateChanged(user => {
+          if (user) {
+            database = firebase.database();
+            setupFirebaseListeners();
+          } else {
+            firebase.auth().signInAnonymously().catch(console.error);
+          }
         });
 
-        // Initialize on load
-        initializeList();
-    </script>
+        return true;
+      } catch (err) {
+        console.error('Firebase init error:', err);
+        updateConnectionStatus(false);
+        return false;
+      }
+    }
+
+    function setupFirebaseListeners() {
+      // main list
+      database.ref(`lists/${listId}/items`).on('value', (snap) => {
+        groceryItems = snap.val() || {};
+        renderItems();
+        updateConnectionStatus(true);
+      }, (err) => {
+        console.error('DB read error:', err);
+        updateConnectionStatus(false);
+      });
+
+      // connection
+      database.ref('.info/connected').on('value', (snap) => {
+        isConnected = snap.val() === true;
+        updateConnectionStatus(isConnected);
+      });
+    }
+
+    function updateConnectionStatus(connected) {
+      const statusEl = document.getElementById('syncStatus');
+      const statusText = document.getElementById('statusText');
+      if (connected) {
+        statusEl.className = 'sync-status';
+        statusText.textContent = 'Connected';
+      } else {
+        statusEl.className = 'sync-status offline';
+        statusText.textContent = 'Offline';
+      }
+    }
+
+    function hideWelcome() {
+      const welcome = document.getElementById('welcomeScreen');
+      welcome.style.opacity = '0';
+      welcome.style.transform = 'scale(0.9)';
+      setTimeout(() => { welcome.classList.add('hidden'); document.getElementById('itemNameInput').focus(); }, 800);
+    }
+    if (sessionStorage.getItem('welcomeShown')) {
+      document.getElementById('welcomeScreen').classList.add('hidden');
+    } else {
+      sessionStorage.setItem('welcomeShown','true');
+    }
+
+    // helpers
+    const clampInt = (v, d=1) => { const n = parseInt(v,10); return Number.isFinite(n) && n>0 ? n : d; };
+
+    // actions
+    function addItem() {
+      if (!database) { alert('Not connected yet.'); return; }
+      const nameInput = document.getElementById('itemNameInput');
+      const sectionSelect = document.getElementById('sectionSelect');
+      const quantityInput = document.getElementById('quantityInput');
+
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      const qty = clampInt(quantityInput.value, 1);
+
+      // check for existing same-name+section
+      let updatedExisting = false;
+      for (const id in groceryItems) {
+        const it = groceryItems[id];
+        if (it && it.name && it.name.toLowerCase() === name.toLowerCase() && it.section === sectionSelect.value) {
+          database.ref(`lists/${listId}/items/${id}`).update({
+            quantity: clampInt((it.quantity || 0) + qty, 1),
+            active: true,
+            lastUpdated: Date.now()
+          }).catch(console.error);
+          updatedExisting = true;
+          break;
+        }
+      }
+
+      if (!updatedExisting) {
+        const newItem = { name, section: sectionSelect.value, quantity: qty, purchased: false, active: true, createdAt: Date.now() };
+        database.ref(`lists/${listId}/items`).push(newItem).catch(e => { console.error(e); alert('Failed to add item.'); });
+      }
+
+      nameInput.value = '';
+      quantityInput.value = '1';
+      nameInput.focus();
+    }
+
+    function createItemRow(item) {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const sectionClass = (item.section || 'Other').toLowerCase().replace(/\s+/g,'-');
+      row.innerHTML = `
+        <div class="item-name">${item.name}</div>
+        <span class="store-section ${sectionClass}">${item.section}</span>
+        <div class="quantity-display">${item.quantity || 1}</div>
+        <div class="checkbox ${item.purchased ? 'checked' : ''}" onclick="togglePurchased('${item.id}')"></div>
+        <div class="checkbox ${item.active ? 'checked' : ''}" onclick="toggleActive('${item.id}')"></div>
+        <button class="delete-btn" onclick="deleteItem('${item.id}')">×</button>
+      `;
+      return row;
+    }
+
+    function renderItems() {
+      const activeContainer = document.getElementById('activeItems');
+      const inactiveContainer = document.getElementById('inactiveItems');
+
+      const itemsArray = Object.entries(groceryItems).map(([id, it]) => ({ ...it, id }));
+      const activeItems = itemsArray.filter(it => !!it.active);
+      const inactiveItems = itemsArray.filter(it => !it.active);
+
+      activeContainer.className = '';
+      activeContainer.innerHTML = '';
+      inactiveContainer.innerHTML = '';
+
+      const sections = ['Bakery','Dairy','Deli','Produce','Meat','Frozen','Other'];
+
+      // active
+      if (activeItems.length === 0) {
+        activeContainer.innerHTML = '<div class="empty-state">No active items. Add your first item above!</div>';
+      } else {
+        sections.forEach(section => {
+          const group = activeItems.filter(it => it.section === section);
+          if (group.length) {
+            const secDiv = document.createElement('div');
+            secDiv.className = 'section';
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.textContent = `▼ ${section}`;
+            const itemsDiv = document.createElement('div');
+            header.addEventListener('click', () => {
+              const visible = itemsDiv.style.display !== 'none';
+              itemsDiv.style.display = visible ? 'none' : 'block';
+              header.textContent = `${visible ? '▶' : '▼'} ${section}`;
+            });
+            secDiv.appendChild(header);
+            group.forEach(it => itemsDiv.appendChild(createItemRow(it)));
+            secDiv.appendChild(itemsDiv);
+            activeContainer.appendChild(secDiv);
+          }
+        });
+      }
+
+      // inactive
+      if (inactiveItems.length === 0) {
+        inactiveContainer.innerHTML = '<div class="empty-state">No inactive items</div>';
+      } else {
+        sections.forEach(section => {
+          const group = inactiveItems.filter(it => it.section === section);
+          if (group.length) {
+            const secDiv = document.createElement('div');
+            secDiv.className = 'section';
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.textContent = `▼ ${section}`;
+            const itemsDiv = document.createElement('div');
+            header.addEventListener('click', () => {
+              const visible = itemsDiv.style.display !== 'none';
+              itemsDiv.style.display = visible ? 'none' : 'block';
+              header.textContent = `${visible ? '▶' : '▼'} ${section}`;
+            });
+            secDiv.appendChild(header);
+            group.forEach(it => itemsDiv.appendChild(createItemRow(it)));
+            secDiv.appendChild(itemsDiv);
+            inactiveContainer.appendChild(secDiv);
+          }
+        });
+      }
+    }
+
+    function togglePurchased(id) {
+      if (!database) return;
+      const it = groceryItems[id];
+      if (it) database.ref(`lists/${listId}/items/${id}`).update({ purchased: !it.purchased }).catch(console.error);
+    }
+    function toggleActive(id) {
+      if (!database) return;
+      const it = groceryItems[id];
+      if (it) database.ref(`lists/${listId}/items/${id}`).update({ active: !it.active }).catch(console.error);
+    }
+    function deleteItem(id) {
+      if (!database) return;
+      if (confirm('Delete this item?')) database.ref(`lists/${listId}/items/${id}`).remove().catch(console.error);
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const shoppingTab = document.getElementById('shoppingTab');
+      const inactiveTab = document.getElementById('inactiveTab');
+      const shoppingList = document.getElementById('shoppingList');
+      const inactiveList = document.getElementById('inactiveList');
+      if (tab === 'shopping') {
+        shoppingTab.classList.add('active'); inactiveTab.classList.remove('active');
+        shoppingList.style.display = 'block'; inactiveList.style.display = 'none';
+      } else {
+        shoppingTab.classList.remove('active'); inactiveTab.classList.add('active');
+        shoppingList.style.display = 'none'; inactiveList.style.display = 'block';
+      }
+    }
+
+    document.getElementById('itemNameInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addItem(); });
+    document.getElementById('addBtn').addEventListener('click', addItem);
+
+    window.addEventListener('load', () => { initFirebase(); });
+  </script>
 </body>
 </html>
