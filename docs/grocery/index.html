@@ -165,7 +165,7 @@
 
 <script>
 /*** Password gate (keep your existing PASSWORD_HASH) ***/
-const PASSWORD_HASH = "REPLACE_WITH_SHA256_HEX";
+const PASSWORD_HASH = "2ada44b0bc821a012f130d7996469e147cc3efdb9470e5696883b4634ef7edb0";
 async function sha256Hex(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function tryUnlock(){const v=document.getElementById('gateInput').value||"";if((await sha256Hex(v))===PASSWORD_HASH){sessionStorage.setItem('grocery_authed','1');document.getElementById('gate').classList.add('hidden');document.getElementById('app').style.display='block';initFirebase();}else{document.getElementById('gateErr').textContent='Incorrect password';}}
 document.getElementById('gateBtn').onclick=tryUnlock;
