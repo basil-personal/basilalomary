@@ -71,37 +71,13 @@
     .rowGrid{grid-template-columns: 1.1fr 1.1fr auto auto auto}
   }
 
-  /* Password gate */
-  #gate{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#0b1220,#0d1426);z-index:10}
-  #gate.hidden{display:none}
-  .gate-card{width:min(92vw,440px);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
-  .gate-title{font-weight:800;font-size:18px;margin-bottom:4px}
-  .gate-sub{color:var(--muted);margin-bottom:12px}
-  .gate-row{display:flex;gap:8px}
-  .gate-input{flex:1;background:#0b1220;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:10px;height:44px}
-  .gate-btn{background:var(--brand);border:0;border-radius:12px;color:#fff;padding:0 14px;font-weight:700;height:44px}
-  .gate-err{min-height:16px;color:#fca5a5;margin-top:8px}
-
   .toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(10px);background:#101826;border:1px solid var(--line);padding:8px 12px;border-radius:10px;font-size:13px;opacity:0;transition:.2s}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
-<div id="gate" role="dialog" aria-modal="true">
-  <div class="gate-card">
-    <div class="gate-title">Enter password</div>
-    <div class="gate-sub">Ashbaugh–Alomary Grocery List</div>
-    <div class="gate-row">
-      <input id="gateInput" class="gate-input" type="password" placeholder="Password" autofocus/>
-      <button id="gateBtn" class="gate-btn">Unlock</button>
-    </div>
-    <div id="gateErr" class="gate-err"></div>
-  </div>
-</div>
-
-<div class="wrap" id="app" style="display:none">
+<div class="wrap" id="app">
   <header>
     <div class="logo">🛒</div><h1>Ashbaugh–Alomary Grocery List</h1>
     <div id="status" class="status off"><span class="dot" style="background:var(--bad)"></span><span id="statusText">Offline</span></div>
@@ -136,14 +112,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-/*** Password gate ***/
-const PASSWORD_HASH = "REPLACE_WITH_SHA256_HEX";
-async function sha256Hex(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function tryUnlock(){const v=document.getElementById('gateInput').value||"";if((await sha256Hex(v))===PASSWORD_HASH){sessionStorage.setItem('grocery_authed','1');document.getElementById('gate').classList.add('hidden');document.getElementById('app').style.display='block';initFirebase();}else{document.getElementById('gateErr').textContent='Incorrect password';}}
-document.getElementById('gateBtn').onclick=tryUnlock;
-document.getElementById('gateInput').addEventListener('keypress',e=>{ if(e.key==='Enter') tryUnlock(); });
-if(sessionStorage.getItem('grocery_authed')==='1'){document.getElementById('gate').classList.add('hidden');document.getElementById('app').style.display='block';setTimeout(initFirebase,0);}
-
 /*** App state ***/
 const listId='beans-main-list';
 const SECTIONS=['Bakery','Dairy','Deli','Produce','Meat','Frozen','Other'];
@@ -309,6 +277,8 @@ qs('#copyBtn').onclick=async()=>{
   await navigator.clipboard.writeText(txt);
   toast('Copied');
 };
+
+initFirebase();
 </script>
 </body>
 </html>
